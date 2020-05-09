@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Index</title>
+{% endblock %}
+
+{% block body %}
+<h1> Update URL</h1>
+
+<form action="/update/{{ key }}" method="POST" style="width:50em;text-align: center;">
+    <input type="text" name="long_url" id="content" value="{{ url }}" style="width: 50%;">
+    <input type="submit" value="Update URL">
+</form>
+{% endblock %}

@@ -9,9 +9,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 from .templates.messages import *
 
-from .database.inmemory import InMemoryUrls, InMemoryDB
-from .database.sql import SqlUrls
-
 
 def create_app(config={}):
     if path := config.get('INSTANCE_PATH'):
@@ -23,17 +20,8 @@ def create_app(config={}):
     app.config.update(config)
 
     with app.app_context():
-        init_database(app)
-        init_routes(app)
+        app.db_backend = SQLAlchemy()
+        app.db_backend.init_app(app)
+        from roosterapp.routes import rooster_crud
+        app.register_blueprint(rooster_crud)
     return app
-
-
-def init_database(app):
-    app.db_backend = db_backend
-    app.urls = url_api
-
-
-def init_routes(app):
-    from yauss.routes import url_crud
-    app.register_blueprint(url_crud)
-    

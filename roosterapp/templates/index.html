@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Ivy Rooster</title>
+{% endblock %}
+
+{% block body %}
+<h1> All URLs </h1>
+
+
+
+<!-- {% if urls|length < 1 %}
+
+    <h4>No shortened URLs in the system, add one below.</h4>
+
+{% else %}
+    <table style="width: 50em;">
+        <tr>
+            <th>Key</th>
+            <th>Long URL</th>
+            <th>Actions</th>
+        </tr>
+        {% for url in urls %}
+            <tr>
+                <td>{{ url.key }}</td>   
+                <td>{{ url.url }}</td>
+                <td>
+                    <a href="/delete/{{ url.key }}">Delete</a>
+                    <br>
+                    <a href="/update/{{ url.key }}">Update</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endif %}
+
+<form action="/" method="POST" style="text-align: center;">
+    <input type="text" name="long_url" id="content" style="width: 50%;">
+    <input type="submit" value="Add URL">
+</form>
+{% endblock %} -->

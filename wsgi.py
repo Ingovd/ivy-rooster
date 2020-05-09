@@ -2,8 +2,7 @@ import os
 
 import argparse
 
-from yauss import create_app as create_yauss
-from key_store import create_app as create_key_store
+from roosterapp import create_app
 
 
 CLI_WELCOME = 'Yet Another Url Shorting Service.'
@@ -22,10 +21,7 @@ def main():
 
     config = {'INSTANCE_PATH': path}
 
-    if args.key:
-        app = create_key_store(config)
-    else:
-        app = create_yauss(config)
+    app = create_app(config)
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
 
