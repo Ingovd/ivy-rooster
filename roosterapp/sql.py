@@ -18,30 +18,30 @@ class Dole(Base):
     __tablename__ = 'doles'
     id = Column(Integer, primary_key = True)
     name = Column(String)
-    occupation = relationship("Presence", backref="dole_sent")
+    occupation = relationship("Presence", backref="dole")
 
 class Person(Base):
     __tablename__ = 'persons'
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    atttendance = relationship("Presence", backref="person_sent")
+    atttendance = relationship("Presence", backref="person")
 
 class Profile(Base):
     __tablename__ = 'profiles'
     id = Column(Integer, primary_key=True)
     name = Column(String)
     ratio = Column(Integer)
-    clients = relationship("Client", backref="client_profile")
+    clients = relationship("Client", backref="profile")
 
 class Client(Base):
     __tablename__ = 'clients'
-    client_id = Column(Integer, ForeignKey("persons.id"), primary_key=True)
+    person_id = Column(Integer, ForeignKey("persons.id"), primary_key=True)
     profile_id = Column(Integer, ForeignKey("profiles.id"))
     person = relationship("Person")
 
 class Staff(Base):
     __tablename__ = 'staffs'
-    staff_id = Column(Integer, ForeignKey("persons.id"), primary_key=True)
+    person_id = Column(Integer, ForeignKey("persons.id"), primary_key=True)
     person = relationship("Person")
 
 @contextmanager

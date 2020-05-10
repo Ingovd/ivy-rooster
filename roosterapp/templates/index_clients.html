@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Ivy Rooster</title>
+{% endblock %}
+
+{% block body %}
+<h1> Cliënten </h1>
+
+
+
+{% if clients|length < 1 %}
+
+    <h4>Er zijn nog geen cliënten in het systeem. Voeg er hieronder een toe.</h4>
+
+{% else %}
+    <table style="width: 50em;">
+        <tr>
+            <th>Naam</th>
+            <th>Zorgprofiel</th>
+        </tr>
+        {% for client in clients %}
+            <tr>
+                <td>{{ client.person.name }}</td>
+                <td>{{ client.profile.name }}</td>
+                <td>
+                    <a href="delete/{{ client.person_id }}">Verwijderen</a>
+                    <br>
+                    <a href="update/{{ client.person_id }}">Aanpassen</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endif %}
+
+<h1>Medewerker toevoegen</h1>
+
+{% if profiles|length < 1 %}
+Ga naar <a href="/profiles">profielen</a> om een zorgprofiel aan te maken.
+{% else %}
+<form action="/clients/add" method="POST" style="width:50em;text-align: center;">
+    <label for="client_name">Naam:</label><br>
+    <input type="text" name="client_name" id="client_name" value="Nieuwe clënt" style="width: 50%;"><br>
+    <label for="profile_id">Kies een zorgprofiel</label><br>
+    <select name="profile_id" id="profile_id">
+        {% for profile in profiles %}
+            <option value="{{ profile.id }}">{{ profile.name }}</option>
+        {% endfor %}
+    </select><br>
+    <input type="submit" value="Toevoegen">
+</form>
+{% endif %}
+{% endblock %}

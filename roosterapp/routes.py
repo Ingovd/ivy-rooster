@@ -13,6 +13,99 @@ from flask import (Blueprint,
 from roosterapp.templates.messages import *
 from roosterapp.sql import *
 
+client_crud = Blueprint('client_crud', __name__, template_folder='templates', url_prefix='/clients')
+
+@client_crud.route('/', methods=['GET'])
+def show_clients():
+    clients = app.db.session.query(Client).all()
+    profiles = app.db.session.query(Profile).all()
+    return render_template('index_clients.html', clients=clients, profiles=profiles)
+
+@client_crud.route('/update/<id>', methods=['GET'])
+def show_update_client(id):
+    if client := app.db.session.query(Client).get(id):
+        return render_template('update_client.html', client=client)
+    else:
+        return redirect(url_for('client_crud.show_clients'))
+
+@client_crud.route('/add', methods=['POST'])
+def create_client():
+    print(request.form)
+    name = request.form.get('client_name', '')
+    profile_id = request.form.get('profile_id','')
+    person = Person(name=name)
+    app.db.session.add(person)
+    app.db.session.commit()
+    client = Client(person_id = person.id, profile_id = profile_id)
+    app.db.session.add(client)
+    app.db.session.commit()
+    return redirect(url_for('client_crud.show_clients'))
+
+@client_crud.route('/delete/<id>')
+def delete_client(id):
+    if client := app.db.session.query(Client).get(id):
+        person = client.person
+        app.db.session.delete(client)
+        app.db.session.delete(person)
+        app.db.session.commit()
+    return redirect(url_for('client_crud.show_clients'))
+
+@client_crud.route('/update/<id>', methods=['POST'])
+def update_client(id=None):
+    if not (client := app.db.session.query(Client).get(id)):
+        flash("Client bestaat niet")
+        return redirect(url_for('client_crud.show_clients'))
+    name = request.form.get('client_name', '')
+    profile_id = request.form.get('profile_id', '')
+    client.person.name = name
+    client.profile_id = profile_id
+    app.db.session.commit()
+    return redirect(url_for('client_crud.show_clients'))
+
+staff_crud = Blueprint('staff_crud', __name__, template_folder='templates', url_prefix='/staffs')
+
+@staff_crud.route('/', methods=['GET'])
+def show_staffs():
+    staffs = app.db.session.query(Staff).all()
+    return render_template('index_staffs.html', staffs = staffs)
+
+@staff_crud.route('/update/<id>', methods=['GET'])
+def show_update_staff(id):
+    if staff := app.db.session.query(Staff).get(id):
+        return render_template('update_staff.html', staff=staff)
+    else:
+        return redirect(url_for('staff_crud.show_staffs'))
+
+@staff_crud.route('/add', methods=['POST'])
+def create_staff():
+    name = request.form.get('staff_name', '')
+    person = Person(name=name)
+    app.db.session.add(person)
+    app.db.session.commit()
+    staff = Staff(person_id = person.id)
+    app.db.session.add(staff)
+    app.db.session.commit()
+    return redirect(url_for('staff_crud.show_staffs'))
+
+@staff_crud.route('/delete/<id>')
+def delete_staff(id):
+    if staff := app.db.session.query(Staff).get(id):
+        person = staff.person
+        app.db.session.delete(staff)
+        app.db.session.delete(person)
+        app.db.session.commit()
+    return redirect(url_for('staff_crud.show_staffs'))
+
+@staff_crud.route('/update/<id>', methods=['POST'])
+def update_staff(id=None):
+    if not (staff := app.db.session.query(Staff).get(id)):
+        flash("Medewerker bestaat niet")
+        return redirect(url_for('staff_crud.show_staffs'))
+    name = request.form.get('staff_name', '')
+    staff.person.name = name
+    app.db.session.commit()
+    return redirect(url_for('staff_crud.show_staffs'))
+
 dole_crud = Blueprint('dole_crud', __name__, template_folder='templates', url_prefix='/doles')
 
 @dole_crud.route('/', methods=['GET'])

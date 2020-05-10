@@ -8,8 +8,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 from .templates.messages import *
-
 from .sql import Base
+# from .routes import *
 
 
 def create_app(config={}):
@@ -25,7 +25,9 @@ def create_app(config={}):
         app.db = SQLAlchemy()
         app.db.init_app(app)
         Base.metadata.create_all(bind=app.db.engine)
-        from roosterapp.routes import profile_crud, dole_crud
+        from roosterapp.routes import profile_crud, dole_crud, staff_crud, client_crud
         app.register_blueprint(profile_crud)
         app.register_blueprint(dole_crud)
+        app.register_blueprint(staff_crud)
+        app.register_blueprint(client_crud)
     return app

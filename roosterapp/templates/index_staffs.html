@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Ivy Rooster</title>
+{% endblock %}
+
+{% block body %}
+<h1> Medewerkers </h1>
+
+
+
+{% if staffs|length < 1 %}
+
+    <h4>Er zijn nog geen medewerkers in het systeem. Voeg er hieronder een toe.</h4>
+
+{% else %}
+    <table style="width: 50em;">
+        <tr>
+            <th>Naam</th>
+            <th>Actions</th>
+        </tr>
+        {% for staff in staffs %}
+            <tr>
+                <td>{{ staff.person.name }}</td>
+                <td>
+                    <a href="delete/{{ staff.person_id }}">Verwijderen</a>
+                    <br>
+                    <a href="update/{{ staff.person_id }}">Aanpassen</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endif %}
+
+<h1>Medewerker toevoegen</h1>
+
+<form action="/staffs/add" method="POST" style="width:50em;text-align: center;">
+    <label for="staff_name">Profielnaam:</label><br>
+    <input type="text" name="staff_name" id="staff_name" value="Nieuwe medewerker" style="width: 50%;"><br>
+    <input type="submit" value="Toevoegen">
+</form>
+{% endblock %}
