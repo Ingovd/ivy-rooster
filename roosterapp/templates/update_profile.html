@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Zorgprofielen</title>
+{% endblock %}
+
+{% block body %}
+<h1>Zorgprofiel aanpassen</h1>
+
+<form action="/profiles/update/{{ profile.id }}" method="POST" style="width:50em;text-align: center;">
+    <label for="profile_name">Profielnaam:</label><br>
+    <input type="text" name="profile_name" id="profile_name" value="{{ profile.name }}" style="width: 50%;"><br>
+    <label for="profile_ratio">Client-uren per medewerker:</label><br>
+    <input type="text" name="profile_ratio" id="profile_ratio" value="{{ profile.ratio }}" style="width: 50%;"><br>
+    <input type="submit" value="Aanpassen">
+</form>
+{% endblock %}

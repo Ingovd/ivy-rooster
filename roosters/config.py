@@ -6,7 +6,7 @@ import os
 SERVER_NAME = 'localhost:5000'
 
 # Will set SQLALCHEMY_DATABASE_URI to 'dialect:///relative/path/to/database.db'
-SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join('..', 'instance', 'roosters.db')
+SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join('..', 'roosters.db')
 
 
 ## flask sesssion

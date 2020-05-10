@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Ivy Rooster</title>
+{% endblock %}
+
+{% block body %}
+<h1> Zorgprofielen </h1>
+
+
+
+{% if profiles|length < 1 %}
+
+    <h4>Er zijn nog geen zorgprofielen in het systeem. Voeg er hieronder een toe.</h4>
+
+{% else %}
+    <table style="width: 50em;">
+        <tr>
+            <th>Profiel</th>
+            <th>Client-uren per medewerker</th>
+            <th>Actions</th>
+        </tr>
+        {% for profile in profiles %}
+            <tr>
+                <td>{{ profile.name }}</td>   
+                <td>{{ profile.ratio }}</td>
+                <td>
+                    <a href="delete/{{ profile.id }}">Verwijderen</a>
+                    <br>
+                    <a href="update/{{ profile.id }}">Aanpassen</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endif %}
+
+<h1>Zorgprofiel toevoegen</h1>
+
+<form action="/profiles/add" method="POST" style="width:50em;text-align: center;">
+    <label for="profile_name">Profielnaam:</label><br>
+    <input type="text" name="profile_name" id="profile_name" value="Nieuw zorgprofiel" style="width: 50%;"><br>
+    <label for="profile_ratio">Client-uren per medewerker:</label><br>
+    <input type="text" name="profile_ratio" id="profile_ratio" value="1" style="width: 50%;"><br>
+    <input type="submit" value="Toevoegen">
+</form>
+{% endblock %}

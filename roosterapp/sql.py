@@ -10,7 +10,7 @@ Base = declarative_base()
 
 class Presence(Base):
     __tablename__ = 'presences'
-    person_name = Column(String, ForeignKey("persons.name"), primary_key=True)
+    person_id = Column(Integer, ForeignKey("persons.id"), primary_key=True)
     dole_id =  Column(Integer, ForeignKey("doles.id"), primary_key=True)
     present = Column(Boolean)
 
@@ -22,24 +22,26 @@ class Dole(Base):
 
 class Person(Base):
     __tablename__ = 'persons'
-    name = Column(String, primary_key=True)
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
     atttendance = relationship("Presence", backref="person_sent")
 
 class Profile(Base):
     __tablename__ = 'profiles'
     id = Column(Integer, primary_key=True)
+    name = Column(String)
     ratio = Column(Integer)
     clients = relationship("Client", backref="client_profile")
 
 class Client(Base):
     __tablename__ = 'clients'
-    client_name = Column(String, ForeignKey("persons.name"), primary_key=True)
-    person = relationship("Person")
+    client_id = Column(Integer, ForeignKey("persons.id"), primary_key=True)
     profile_id = Column(Integer, ForeignKey("profiles.id"))
+    person = relationship("Person")
 
 class Staff(Base):
     __tablename__ = 'staffs'
-    staff_name = Column(String, ForeignKey("persons.name"), primary_key=True)
+    staff_id = Column(Integer, ForeignKey("persons.id"), primary_key=True)
     person = relationship("Person")
 
 @contextmanager
@@ -68,7 +70,6 @@ def with_scoped_session(func):
         with scoped_session(self.db) as session:
             return func(self, *args, **dict(kwargs, session=session))
     return wrapper
-
 
 # class SqlUrls(UrlAPI):
 #     """ SQLAlchemy backed implementation or the URL API """

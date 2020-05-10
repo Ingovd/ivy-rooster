@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Dagdelen</title>
+{% endblock %}
+
+{% block body %}
+<h1>Dagdeel aanpassen</h1>
+
+<form action="/doles/update/{{ dole.id }}" method="POST" style="width:50em;text-align: center;">
+    <label for="dole_name">Profielnaam:</label><br>
+    <input type="text" name="dole_name" id="dole_name" value="{{ dole.name }}" style="width: 50%;"><br>
+    <input type="submit" value="Aanpassen">
+</form>
+{% endblock %}

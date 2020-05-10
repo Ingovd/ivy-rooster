@@ -6,71 +6,100 @@ from flask import (Blueprint,
                    redirect,
                    abort,
                    flash,
+                   url_for,
                    current_app as app)
 
 
-from .templates.messages import *
+from roosterapp.templates.messages import *
+from roosterapp.sql import *
+
+dole_crud = Blueprint('dole_crud', __name__, template_folder='templates', url_prefix='/doles')
+
+@dole_crud.route('/', methods=['GET'])
+def show_doles():
+    doles = app.db.session.query(Dole).all()
+    return render_template('index_doles.html', doles = doles)
+
+@dole_crud.route('/update/<id>', methods=['GET'])
+def show_update_dole(id):
+    if dole := app.db.session.query(Dole).get(id):
+        return render_template('update_dole.html', dole=dole)
+    else:
+        return redirect(url_for('dole_crud.show_doles'))
+
+@dole_crud.route('/add', methods=['POST'])
+def create_dole():
+    name = request.form.get('dole_name', '')
+    dole = Dole(name=name)
+    app.db.session.add(dole)
+    app.db.session.commit()
+    return redirect(url_for('dole_crud.show_doles'))
+
+@dole_crud.route('/delete/<id>')
+def delete_dole(id):
+    if dole := app.db.session.query(Dole).get(id):
+        app.db.session.delete(dole)
+        app.db.session.commit()
+    return redirect(url_for('dole_crud.show_doles'))
+
+@dole_crud.route('/update/<id>', methods=['POST'])
+def update_dole(id=None):
+    if not (dole := app.db.session.query(Dole).get(id)):
+        flash("Dagdeel bestaat niet")
+        return redirect(url_for('dole_crud.show_doles'))
+    name = request.form.get('dole_name', '')
+    dole.name = name
+    app.db.session.commit()
+    return redirect(url_for('dole_crud.show_doles'))
 
 
-""" Flask blueprint that handles the Rooster CRUD """
-rooster_crud = Blueprint('rooster_crud', __name__, template_folder='templates')
 
+profile_crud = Blueprint('profile_crud', __name__, template_folder='templates', url_prefix='/profiles')
 
-# @rooster_crud.route('/', methods=['POST'])
-# def handle_create_url(key=None):
-#     form_url = request.form.get('long_url', '')
-#     if keyurl := commit_url(app.keys.consume, form_url):
-#         flash(USR_HTML_URL_ADD_1URL.format(app.short_url(keyurl.key)))
-#         return redirect('/')
-#     else:
-#         return redirect(request.url_rule)
+@profile_crud.route('/', methods=['GET'])
+def show_profiles():
+    profiles = app.db.session.query(Profile).all()
+    return render_template('index_profiles.html', profiles = profiles)
 
+@profile_crud.route('/update/<id>', methods=['GET'])
+def show_update_profile(id):
+    if profile := app.db.session.query(Profile).get(id):
+        return render_template('update_profile.html', profile=profile)
+    else:
+        return redirect(url_for('profile_crud.show_profiles'))
 
-# @rooster_crud.route('/update/<key>', methods=['POST'])
-# def handle_update_url(key=None):
-#     if not (url := app.urls[key]):
-#         abort(404)
-#     form_url = request.form.get('long_url', '')
-#     if keyurl := commit_url(lambda : key, form_url):
-#         flash(USR_UPDATE_1URL_2URL.format(url, keyurl.url))
-#         return redirect('/')
-#     else:
-#         return redirect(request.url_rule)
+@profile_crud.route('/add', methods=['POST'])
+def create_profile():
+    name = request.form.get('profile_name', '')
+    try:
+        ratio = int(request.form.get('profile_ratio', '1'))
+    except ValueError:
+        flash("Ongeldig getal ingevoerd")
+        return redirect(url_for('profile_crud.show_profiles'))
+    profile = Profile(name=name, ratio=ratio)
+    app.db.session.add(profile)
+    app.db.session.commit()
+    return redirect(url_for('profile_crud.show_profiles'))
 
+@profile_crud.route('/delete/<id>')
+def delete_profile(id):
+    if profile := app.db.session.query(Profile).get(id):
+        app.db.session.delete(profile)
+        app.db.session.commit()
+    return redirect(url_for('profile_crud.show_profiles'))
 
-# @rooster_crud.route('/<key>')
-# def handle_read_url(key):
-#     """ Redirect route
-    
-#     TODO: Isolate the caching logic; there exists a caching decorator,
-#           but I haven't tested if this caches 404's.
-#     """
-
-#     try:
-#         if response := app.cache.get(key):
-#             return response
-#     except Exception as err:
-#         app.logger.warning(APP_CACHE_1ERR.format(err))
-#     if url := app.urls[key]:
-#         response = redirect(url)
-#     else:
-#         abort(404)
-#     try:
-#         app.cache.set(key, response)
-#     except Exception as err:
-#         app.logger.warning(APP_CACHE_1ERR.format(err))
-#     return response
-
-
-# @rooster_crud.route('/delete/<key>')
-# def handle_delete_url(key):
-#     if url := app.urls[key]:
-#         del app.urls[key]
-#         flash(USR_URL_DEL_1URL.format(url))
-#         return redirect('/')
-#     abort(404)
-
-
-@rooster_crud.route('/', methods=['GET'])
-def show_index_view():
-    return render_template('index.html')
+@profile_crud.route('/update/<id>', methods=['POST'])
+def update_dole(id=None):
+    if not (profile := app.db.session.query(Profile).get(id)):
+        flash("Profiel bestaat niet")
+        return redirect(url_for('profile_crud.show_profiles'))
+    name = request.form.get('profile_name', '')
+    try:
+        ratio = int(request.form.get('profile_ratio', '1'))
+    except ValueError:
+        flash("Ongeldig getal ingevoerd")
+        return redirect(url_for('profile_crud.show_profiles'))
+    profile.name = name
+    profile.ratio = ratio
+    app.db.session.commit()
+    return redirect(url_for('profile_crud.show_profiles'))

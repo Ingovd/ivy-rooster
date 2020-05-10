@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Ivy Rooster</title>
+{% endblock %}
+
+{% block body %}
+<h1> Dagdelen </h1>
+
+
+
+{% if doles|length < 1 %}
+
+    <h4>Er zijn nog geen dagdelen in het systeem. Voeg er hieronder een toe.</h4>
+
+{% else %}
+    <table style="width: 50em;">
+        <tr>
+            <th>Dagdeel</th>
+            <th>Actions</th>
+        </tr>
+        {% for dole in doles %}
+            <tr>
+                <td>{{ dole.name }}</td>
+                <td>
+                    <a href="delete/{{ dole.id }}">Verwijderen</a>
+                    <br>
+                    <a href="update/{{ dole.id }}">Aanpassen</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endif %}
+
+<h1>Dagdeel toevoegen</h1>
+
+<form action="/doles/add" method="POST" style="width:50em;text-align: center;">
+    <label for="dole_name">Profielnaam:</label><br>
+    <input type="text" name="dole_name" id="dole_name" value="Nieuw zorgprofiel" style="width: 50%;"><br>
+    <input type="submit" value="Toevoegen">
+</form>
+{% endblock %}

@@ -9,6 +9,8 @@ from flask_sqlalchemy import SQLAlchemy
 
 from .templates.messages import *
 
+from .sql import Base
+
 
 def create_app(config={}):
     if path := config.get('INSTANCE_PATH'):
@@ -20,8 +22,10 @@ def create_app(config={}):
     app.config.update(config)
 
     with app.app_context():
-        app.db_backend = SQLAlchemy()
-        app.db_backend.init_app(app)
-        from roosterapp.routes import rooster_crud
-        app.register_blueprint(rooster_crud)
+        app.db = SQLAlchemy()
+        app.db.init_app(app)
+        Base.metadata.create_all(bind=app.db.engine)
+        from roosterapp.routes import profile_crud, dole_crud
+        app.register_blueprint(profile_crud)
+        app.register_blueprint(dole_crud)
     return app
