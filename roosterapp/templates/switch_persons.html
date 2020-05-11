@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Ivy Rooster</title>
+{% endblock %}
+
+{% block body %}
+<h1> Personen kiezen </h1>
+
+<form action="/persons/update" method="POST">
+<div class="row">
+    <div class="column">
+    {% if clients|length < 1 %}
+
+        <h4>Er zijn nog geen cliënten in het systeem. Voeg ze <a href="/clients">hier</a> toe.</h4>
+
+    {% else %}
+        <table style="width: 50em;">
+            <tr>
+                <th>Naam</th>
+                <th>Actief</th>
+            </tr>
+            {% for client in clients %}
+                <tr>
+                    <td><label for="{{ client.person.id }}">{{ client.person.name }}</label></td>
+                    <td><input type="checkbox" name="{{ client.person.id }}" id="{{ client.person.id }}"{% if client.person.active %} checked="checked"{% endif %}></td>
+                </tr>
+            {% endfor %}
+        </table>
+
+    {% endif %}
+    </div>
+    <div class="column">
+        {% if staffs|length < 1 %}
+    
+        <h4>Er zijn nog geen medewerkers in het systeem. Voeg ze <a href="/staffs">hier</a> toe.</h4>
+    
+        {% else %}
+            <table style="width: 50em;">
+                <tr>
+                    <th>Naam</th>
+                    <th>Actief</th>
+                </tr>
+                {% for staff in staffs %}
+                <tr>
+                    <td><label for="{{ staff.person.id }}">{{ staff.person.name }}</label></td>
+                    <td><input type="checkbox" name="{{ staff.person.id }}" id="{{ staff.person.id }}"{% if staff.person.active %} checked="checked"{% endif %}></td>
+                </tr>
+                {% endfor %}
+            </table>
+    
+        {% endif %}
+        </div>
+</div>
+<input type="submit" value="Opslaan">
+</form>
+{% endblock %}

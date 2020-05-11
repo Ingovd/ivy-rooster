@@ -18,13 +18,14 @@ class Dole(Base):
     __tablename__ = 'doles'
     id = Column(Integer, primary_key = True)
     name = Column(String)
-    occupation = relationship("Presence", backref="dole")
+    occupation = relationship("Presence", backref="dole", cascade="delete, delete-orphan")
 
 class Person(Base):
     __tablename__ = 'persons'
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    atttendance = relationship("Presence", backref="person")
+    active = Column(Boolean, default=True)
+    atttendance = relationship("Presence", backref="person", cascade="delete, delete-orphan")
 
 class Profile(Base):
     __tablename__ = 'profiles'
@@ -37,6 +38,7 @@ class Client(Base):
     __tablename__ = 'clients'
     person_id = Column(Integer, ForeignKey("persons.id"), primary_key=True)
     profile_id = Column(Integer, ForeignKey("profiles.id"))
+    nr_doles = Column(Integer, default=0)
     person = relationship("Person")
 
 class Staff(Base):

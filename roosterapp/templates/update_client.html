@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Cliënten</title>
+{% endblock %}
+
+{% block body %}
+<h1>Cliënt aanpassen</h1>
+
+<form action="/clients/update/{{ client.person_id }}" method="POST" style="width:50em;text-align: center;">
+    <label for="client_name">Naam:</label><br>
+    <input type="text" name="client_name" id="client_name" value="{{ client.person.name }}" style="width: 50%;"><br>
+    <label for="nr_doles">Aantal dagdelen:</label><br>
+    <input type="text" name="nr_doles" id="nr_doles" value="{{ client.nr_doles }}" style="width: 50%;"><br>
+    <label for="profile_id">Kies een zorgprofiel</label><br>
+    <select name="profile_id" id="profile_id" value="client.profile_id">
+        {% for profile in profiles %}
+            <option value="{{ profile.id }}">{{ profile.name }}</option>
+        {% endfor %}
+    </select><br>
+    <input type="submit" value="Aanpassen">
+</form>
+{% endblock %}

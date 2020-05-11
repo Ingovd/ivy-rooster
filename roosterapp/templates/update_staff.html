@@ -8,7 +8,7 @@
 <h1>Medewerker aanpassen</h1>
 
 <form action="/staffs/update/{{ staff.person_id }}" method="POST" style="width:50em;text-align: center;">
-    <label for="staff_name">Profielnaam:</label><br>
+    <label for="staff_name">Naam:</label><br>
     <input type="text" name="staff_name" id="staff_name" value="{{ staff.person.name }}" style="width: 50%;"><br>
     <input type="submit" value="Aanpassen">
 </form>

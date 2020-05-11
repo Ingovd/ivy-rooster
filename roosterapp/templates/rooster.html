@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Ivy Rooster</title>
+{% endblock %}
+
+{% block body %}
+<h1> Rooster maken </h1>
+
+
+
+{% if doles|length < 1 %}
+
+    <h4>Er zijn geen dagdelen in het systeem. Voeg er <a href="/doles">hier</a> een toe.</h4>
+
+{% else %}
+<form action="/rooster" method="POST">
+    <input type="submit" value="Genereer Rooster!">
+</form>
+
+<form action="/presence/update" method="POST">
+    <table style="width: 50em;">
+        <tr>
+            <th></th>
+            {% for dole in doles %}
+            <th>{{  dole.name }}</th>
+            {% endfor %}
+        </tr>
+        {% for client in clients %}
+            <tr>
+                <td>{{ client.person.name }}</td>   
+                {% for dole in doles %}
+                <td>
+                    <div class="presence">
+                        <span class="constraint">
+                            <input type="checkbox" id="presence_{{ client.person.id }}_{{ dole.id }}" name="presence_{{ client.person.id }}_{{ dole.id }}"{% if dole.id in rooster[client.person_id] %} checked="checked"{% endif %}>
+                        </span>
+                        <div class="choice">
+                            <input type="radio" id="present_{{ client.person.id }}_{{ dole.id }}" name="{{ client.person.id }}_{{ dole.id }}" value="present"{% if
+                                (dole.id in rooster[client.person_id]) and (rooster[client.person_id][dole.id]) %} checked="checked"
+                                {% endif %}>
+                            <label for="present_{{ client.person.id }}_{{ dole.id }}">Aanwezig</label>
+                            <br>
+                            <input type="radio" id="absent_{{ client.person.id }}_{{ dole.id }}" name="{{ client.person.id }}_{{ dole.id }}" value="absent"{% if
+                                (dole.id in rooster[client.person_id]) and (not rooster[client.person_id][dole.id]) %} checked="checked"
+                                {% endif %}>
+                            <label for="absent_{{ client.person.id }}_{{ dole.id }}">Afwezig</label>
+                        </div>
+                    </div>
+                </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+        <tr>
+            <th></th>
+            {% for dole in doles %}
+            <th>{{  dole.name }}</th>
+            {% endfor %}
+        </tr>
+        {% for staff in staffs %}
+            <tr>
+                <td>{{ staff.person.name }}</td>   
+                {% for dole in doles %}
+                <td>
+                    <div class="presence">
+                        <span class="constraint">
+                            <input type="checkbox" id="presence_{{ staff.person.id }}_{{ dole.id }}" name="presence_{{ staff.person.id }}_{{ dole.id }}"{% if dole.id in rooster[staff.person_id] %} checked="checked"{% endif %}>
+                        </span>
+                        <div class="choice">
+                            <input type="radio" id="present_{{ staff.person.id }}_{{ dole.id }}" name="{{ staff.person.id }}_{{ dole.id }}" value="present"{% if
+                                (dole.id in rooster[staff.person_id]) and (rooster[staff.person_id][dole.id]) %} checked="checked"
+                                {% endif %}>
+                            <label for="present_{{ staff.person.id }}_{{ dole.id }}">Aanwezig</label>
+                            <br>
+                            <input type="radio" id="absent_{{ staff.person.id }}_{{ dole.id }}" name="{{ staff.person.id }}_{{ dole.id }}" value="absent"{% if
+                                (dole.id in rooster[staff.person_id]) and (not rooster[staff.person_id][dole.id]) %} checked="checked"
+                                {% endif %}>
+                            <label for="absent_{{ staff.person.id }}_{{ dole.id }}">Afwezig</label>
+                        </div>
+                    </div>
+                </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+<input type="submit" value="Opslaan">
+</form>
+{% endif %}
+
+{% endblock %}
