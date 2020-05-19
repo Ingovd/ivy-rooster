@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Individuele Begeleidingen</title>
+{% endblock %}
+
+{% block body %}
+<h1>Individuele Begeleiding aanpassen</h1>
+
+<form action="/sessions/update/{{ session.id }}" method="POST" style="width:50em;text-align: center;">
+    <label for="client_id">Kies een client</label><br>
+    <select name="client_id" id="client_id">
+        {% for client in clients %}
+            <option value="{{ client.person.id }}">{{ client.person.name }}</option>
+        {% endfor %}
+    </select><br>
+    <label for="staff_id">Kies een medewerker</label><br>
+    <select name="staff_id" id="staff_id">
+        {% for staff in staffs %}
+            <option value="{{ staff.person.id }}">{{ staff.person.name }}</option>
+        {% endfor %}
+    </select><br>
+    <label for="hours">Aantal uren:</label><br>
+    <input type="text" name="hours" id="hours" value="1" style="width: 50%;"><br>
+    <input type="submit" value="Aanpassen">
+</form>
+{% endblock %}

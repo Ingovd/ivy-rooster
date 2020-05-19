@@ -25,11 +25,12 @@ def create_app(config={}):
         app.db = SQLAlchemy()
         app.db.init_app(app)
         Base.metadata.create_all(bind=app.db.engine)
-        from roosterapp.routes import profile_crud, dole_crud, staff_crud, client_crud, person_switch, rooster_maker
+        from roosterapp.routes import profile_crud, dole_crud, staff_crud, client_crud, session_crud, person_switch, rooster_maker
         app.register_blueprint(profile_crud)
         app.register_blueprint(dole_crud)
         app.register_blueprint(staff_crud)
         app.register_blueprint(client_crud)
+        app.register_blueprint(session_crud)
         app.register_blueprint(person_switch)
         app.register_blueprint(rooster_maker)
     return app

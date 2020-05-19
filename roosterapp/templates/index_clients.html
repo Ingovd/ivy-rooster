@@ -17,14 +17,14 @@
     <table style="width: 50em;">
         <tr>
             <th>Naam</th>
-            <th>Aantal dagdelen</th>
+            <th>Groepuren</th>
             <th>Zorgprofiel</th>
             <th>Acties</th>
         </tr>
         {% for client in clients %}
             <tr>
                 <td>{{ client.person.name }}</td>
-                <td>{{ client.nr_doles }}</td>
+                <td>{{ client.hours }}</td>
                 <td>{{ client.profile.name }}</td>
                 <td>
                     <a href="delete/{{ client.person_id }}">Verwijderen</a>
@@ -45,8 +45,8 @@ Ga naar <a href="/profiles">profielen</a> om een zorgprofiel aan te maken.
 <form action="/clients/add" method="POST" style="width:50em;text-align: center;">
     <label for="client_name">Naam:</label><br>
     <input type="text" name="client_name" id="client_name" value="Nieuwe clënt" style="width: 50%;"><br>
-    <label for="nr_doles">Aantal dagdelen:</label><br>
-    <input type="text" name="nr_doles" id="nr_doles" value="1" style="width: 50%;"><br>
+    <label for="hours">Aantal dagdelen:</label><br>
+    <input type="text" name="hours" id="hours" value="1" style="width: 50%;"><br>
     <label for="profile_id">Kies een zorgprofiel</label><br>
     <select name="profile_id" id="profile_id">
         {% for profile in profiles %}

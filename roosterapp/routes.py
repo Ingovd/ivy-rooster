@@ -86,6 +86,64 @@ def update_persons():
     app.db.session.commit()
     return redirect(url_for('person_switch.show_persons'))
 
+session_crud = Blueprint('session_crud', __name__, template_folder='templates', url_prefix='/sessions')
+
+@session_crud.route('/', methods=['GET'])
+def show_sessions():
+    sessions = app.db.session.query(Session).all()
+    clients = app.db.session.query(Client).all()
+    staffs = app.db.session.query(Staff).all()
+    return render_template('index_sessions.html', sessions=sessions, clients=clients, staffs=staffs)
+
+@session_crud.route('/update/<id>', methods=['GET'])
+def show_update_session(id):
+    if session := app.db.session.query(Session).get(id):
+        clients = app.db.session.query(Client).all()
+        staffs = app.db.session.query(Staff).all()
+        return render_template('update_session.html', session=session, clients=clients, staffs=staffs)
+    else:
+        return redirect(url_for('session_crud.show_sessions'))
+
+@session_crud.route('/add', methods=['POST'])
+def create_session():
+    print(request.form)
+    client_id = request.form.get('client_id', '')
+    staff_id = request.form.get('staff_id', '')
+    try:
+        hours = int(request.form.get('hours', '1'))
+    except ValueError:
+        flash("Ongeldig getal ingevoerd")
+        return redirect(url_for('session_crud.show_sessions'))
+    session = Session(client_id = client_id, staff_id=staff_id, hours=hours)
+    app.db.session.add(session)
+    app.db.session.commit()
+    return redirect(url_for('session_crud.show_sessions'))
+
+@session_crud.route('/delete/<id>')
+def delete_session(id):
+    if session := app.db.session.query(Session).get(id):
+        app.db.session.delete(session)
+        app.db.session.commit()
+    return redirect(url_for('session_crud.show_sessions'))
+
+@session_crud.route('/update/<id>', methods=['POST'])
+def update_client(id=None):
+    if not (session := app.db.session.query(Session).get(id)):
+        flash("IB bestaat niet")
+        return redirect(url_for('session_crud.show_sessions'))
+    client_id = request.form.get('client_id', '')
+    staff_id = request.form.get('staff_id', '')
+    try:
+        hours = int(request.form.get('hours', '1'))
+    except ValueError:
+        flash("Ongeldig getal ingevoerd")
+        return redirect(url_for('session_crud.show_sessions'))
+    session.client_id = client_id
+    session.staff_id = staff_id
+    session.hours = hours
+    app.db.session.commit()
+    return redirect(url_for('session_crud.show_sessions'))
+
 client_crud = Blueprint('client_crud', __name__, template_folder='templates', url_prefix='/clients')
 
 @client_crud.route('/', methods=['GET'])
@@ -107,7 +165,7 @@ def create_client():
     print(request.form)
     name = request.form.get('client_name', '')
     try:
-        nr_doles = int(request.form.get('nr_doles', '1'))
+        hours = int(request.form.get('hours', '1'))
     except ValueError:
         flash("Ongeldig getal ingevoerd")
         return redirect(url_for('client_crud.show_clients'))
@@ -115,7 +173,7 @@ def create_client():
     person = Person(name=name)
     app.db.session.add(person)
     app.db.session.commit()
-    client = Client(person_id = person.id, nr_doles=nr_doles, profile_id = profile_id)
+    client = Client(person_id = person.id, hours=hours, profile_id = profile_id)
     app.db.session.add(client)
     app.db.session.commit()
     return redirect(url_for('client_crud.show_clients'))

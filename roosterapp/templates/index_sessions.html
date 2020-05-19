@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Ivy Rooster</title>
+{% endblock %}
+
+{% block body %}
+<h1> Individuele Begeleiding </h1>
+
+
+
+{% if sessions|length < 1 %}
+
+    <h4>Er zijn nog geen individuele begeleidingen in het systeem. Voeg er hieronder een toe.</h4>
+
+{% else %}
+    <table style="width: 50em;">
+        <tr>
+            <th>Cliënt</th>
+            <th>Medewerker</th>
+            <th>Uren</th>
+            <th>Acties</th>
+        </tr>
+        {% for session in sessions %}
+            <tr>
+                <td>{{ session.client.name }}</td>
+                <td>{{ session.staff.name }}</td>
+                <td>{{ session.hours }}</td>
+                <td>
+                    <a href="delete/{{ session.id }}">Verwijderen</a>
+                    <br>
+                    <a href="update/{{ session.id }}">Aanpassen</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endif %}
+
+<h2>Individuele begeleiding toevoegen</h2>
+
+{% if clients|length < 1 %}
+Ga naar <a href="/clients">cliënten</a> om een client aan te maken.
+{% elif staffs|length < 1 %}
+Ga naar <a href="/staffs">medewerkers</a> om een medewerker aan te maken.
+{% else %}
+<form action="/sessions/add" method="POST" style="width:50em;text-align: center;">
+    <label for="client_id">Kies een client</label><br>
+    <select name="client_id" id="client_id">
+        {% for client in clients %}
+            <option value="{{ client.person.id }}">{{ client.person.name }}</option>
+        {% endfor %}
+    </select><br>
+    <label for="staff_id">Kies een medewerker</label><br>
+    <select name="staff_id" id="staff_id">
+        {% for staff in staffs %}
+            <option value="{{ staff.person.id }}">{{ staff.person.name }}</option>
+        {% endfor %}
+    </select><br>
+    <label for="hours">Aantal uren:</label><br>
+    <input type="text" name="hours" id="hours" value="1" style="width: 50%;"><br>
+    <input type="submit" value="Toevoegen">
+</form>
+{% endif %}
+{% endblock %}

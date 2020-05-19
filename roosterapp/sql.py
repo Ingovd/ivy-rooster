@@ -8,6 +8,13 @@ from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
+class Session(Base):
+    __tablename__ = 'sessions'
+    id = Column(Integer, primary_key=True)
+    staff_id = Column(Integer, ForeignKey("staffs.person_id"))
+    client_id = Column(Integer, ForeignKey("clients.person_id"))
+    hours = Column(Integer, default=1)
+
 class Presence(Base):
     __tablename__ = 'presences'
     person_id = Column(Integer, ForeignKey("persons.id"), primary_key=True)
@@ -18,6 +25,7 @@ class Dole(Base):
     __tablename__ = 'doles'
     id = Column(Integer, primary_key = True)
     name = Column(String)
+    hours = Column(Integer, default=1)
     occupation = relationship("Presence", backref="dole", cascade="delete, delete-orphan")
 
 class Person(Base):
@@ -38,13 +46,17 @@ class Client(Base):
     __tablename__ = 'clients'
     person_id = Column(Integer, ForeignKey("persons.id"), primary_key=True)
     profile_id = Column(Integer, ForeignKey("profiles.id"))
-    nr_doles = Column(Integer, default=0)
+    hours = Column(Integer, default=0)
     person = relationship("Person")
+    sessions = relationship("Session", backref="client", cascade="delete, delete-orphan")
 
 class Staff(Base):
     __tablename__ = 'staffs'
     person_id = Column(Integer, ForeignKey("persons.id"), primary_key=True)
+    min_hours = Column(Integer, default=0)
+    max_hours = Column(Integer, default=0)
     person = relationship("Person")
+    sessions = relationship("Session", backref="staff", cascade="delete, delete-orphan")
 
 @contextmanager
 def scoped_session(db):
