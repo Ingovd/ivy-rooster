@@ -1,5 +1,6 @@
 {
     "python.linting.pylintEnabled": false,
     "python.linting.flake8Enabled": true,
-    "python.linting.enabled": false
+    "python.linting.enabled": false,
+    "python.pythonPath": "c:\\Users\\henkd\\Documents\\Projects\\klimop\\ivy-rooster\\env\\Scripts\\python.exe"
 }

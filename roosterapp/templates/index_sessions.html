@@ -23,8 +23,8 @@
         </tr>
         {% for session in sessions %}
             <tr>
-                <td>{{ session.client.name }}</td>
-                <td>{{ session.staff.name }}</td>
+                <td>{{ session.client.person.name }}</td>
+                <td>{{ session.staff.person.name }}</td>
                 <td>{{ session.hours }}</td>
                 <td>
                     <a href="delete/{{ session.id }}">Verwijderen</a>

@@ -12,7 +12,9 @@ from flask import (Blueprint,
 from roosterapp.templates.messages import *
 from roosterapp.sql import *
 
+
 rooster_maker = Blueprint('rooster_maker', __name__, template_folder='templates')
+
 
 @rooster_maker.route('/rooster', methods=['POST'])
 def generate_rooster():
@@ -41,6 +43,7 @@ def show_rooster():
     
     return render_template('rooster.html', staffs=staffs, clients=clients, doles=doles, rooster=rooster)
 
+
 @rooster_maker.route('/presence/update', methods=['POST'])
 def update_rooster():
     clients = app.db.session.query(Client).join(Person).filter(Person.active)
@@ -67,13 +70,16 @@ def update_rooster():
     app.db.session.commit()
     return redirect(url_for('rooster_maker.show_rooster'))
 
+
 person_switch = Blueprint('person_switch', __name__, template_folder='templates', url_prefix='/persons')
+
 
 @person_switch.route('/', methods=['GET'])
 def show_persons():
     clients = app.db.session.query(Client).all()
     staffs = app.db.session.query(Staff).all()
     return render_template('switch_persons.html', clients=clients, staffs=staffs)
+
 
 @person_switch.route('/update', methods=['POST'])
 def update_persons():
@@ -86,7 +92,9 @@ def update_persons():
     app.db.session.commit()
     return redirect(url_for('person_switch.show_persons'))
 
+
 session_crud = Blueprint('session_crud', __name__, template_folder='templates', url_prefix='/sessions')
+
 
 @session_crud.route('/', methods=['GET'])
 def show_sessions():
@@ -94,6 +102,7 @@ def show_sessions():
     clients = app.db.session.query(Client).all()
     staffs = app.db.session.query(Staff).all()
     return render_template('index_sessions.html', sessions=sessions, clients=clients, staffs=staffs)
+
 
 @session_crud.route('/update/<id>', methods=['GET'])
 def show_update_session(id):
@@ -103,6 +112,7 @@ def show_update_session(id):
         return render_template('update_session.html', session=session, clients=clients, staffs=staffs)
     else:
         return redirect(url_for('session_crud.show_sessions'))
+
 
 @session_crud.route('/add', methods=['POST'])
 def create_session():
@@ -119,12 +129,14 @@ def create_session():
     app.db.session.commit()
     return redirect(url_for('session_crud.show_sessions'))
 
+
 @session_crud.route('/delete/<id>')
 def delete_session(id):
     if session := app.db.session.query(Session).get(id):
         app.db.session.delete(session)
         app.db.session.commit()
     return redirect(url_for('session_crud.show_sessions'))
+
 
 @session_crud.route('/update/<id>', methods=['POST'])
 def update_client(id=None):
@@ -144,13 +156,16 @@ def update_client(id=None):
     app.db.session.commit()
     return redirect(url_for('session_crud.show_sessions'))
 
+
 client_crud = Blueprint('client_crud', __name__, template_folder='templates', url_prefix='/clients')
+
 
 @client_crud.route('/', methods=['GET'])
 def show_clients():
     clients = app.db.session.query(Client).all()
     profiles = app.db.session.query(Profile).all()
     return render_template('index_clients.html', clients=clients, profiles=profiles)
+
 
 @client_crud.route('/update/<id>', methods=['GET'])
 def show_update_client(id):
@@ -159,6 +174,7 @@ def show_update_client(id):
         return render_template('update_client.html', client=client, profiles=profiles)
     else:
         return redirect(url_for('client_crud.show_clients'))
+
 
 @client_crud.route('/add', methods=['POST'])
 def create_client():
@@ -178,6 +194,7 @@ def create_client():
     app.db.session.commit()
     return redirect(url_for('client_crud.show_clients'))
 
+
 @client_crud.route('/delete/<id>')
 def delete_client(id):
     if client := app.db.session.query(Client).get(id):
@@ -186,6 +203,7 @@ def delete_client(id):
         app.db.session.delete(person)
         app.db.session.commit()
     return redirect(url_for('client_crud.show_clients'))
+
 
 @client_crud.route('/update/<id>', methods=['POST'])
 def update_client(id=None):
@@ -199,12 +217,15 @@ def update_client(id=None):
     app.db.session.commit()
     return redirect(url_for('client_crud.show_clients'))
 
+
 staff_crud = Blueprint('staff_crud', __name__, template_folder='templates', url_prefix='/staffs')
+
 
 @staff_crud.route('/', methods=['GET'])
 def show_staffs():
     staffs = app.db.session.query(Staff).all()
     return render_template('index_staffs.html', staffs = staffs)
+
 
 @staff_crud.route('/update/<id>', methods=['GET'])
 def show_update_staff(id):
@@ -212,6 +233,7 @@ def show_update_staff(id):
         return render_template('update_staff.html', staff=staff)
     else:
         return redirect(url_for('staff_crud.show_staffs'))
+
 
 @staff_crud.route('/add', methods=['POST'])
 def create_staff():
@@ -224,6 +246,7 @@ def create_staff():
     app.db.session.commit()
     return redirect(url_for('staff_crud.show_staffs'))
 
+
 @staff_crud.route('/delete/<id>')
 def delete_staff(id):
     if staff := app.db.session.query(Staff).get(id):
@@ -232,6 +255,7 @@ def delete_staff(id):
         app.db.session.delete(person)
         app.db.session.commit()
     return redirect(url_for('staff_crud.show_staffs'))
+
 
 @staff_crud.route('/update/<id>', methods=['POST'])
 def update_staff(id=None):
@@ -243,12 +267,15 @@ def update_staff(id=None):
     app.db.session.commit()
     return redirect(url_for('staff_crud.show_staffs'))
 
+
 dole_crud = Blueprint('dole_crud', __name__, template_folder='templates', url_prefix='/doles')
+
 
 @dole_crud.route('/', methods=['GET'])
 def show_doles():
     doles = app.db.session.query(Dole).all()
     return render_template('index_doles.html', doles = doles)
+
 
 @dole_crud.route('/update/<id>', methods=['GET'])
 def show_update_dole(id):
@@ -257,13 +284,20 @@ def show_update_dole(id):
     else:
         return redirect(url_for('dole_crud.show_doles'))
 
+
 @dole_crud.route('/add', methods=['POST'])
 def create_dole():
     name = request.form.get('dole_name', '')
-    dole = Dole(name=name)
+    try:
+        hours = int(request.form.get('hours', '1'))
+    except ValueError:
+        flash("Ongeldig getal ingevoerd")
+        return redirect(url_for('dole_crud.show_doles'))
+    dole = Dole(name=name, hours=hours)
     app.db.session.add(dole)
     app.db.session.commit()
     return redirect(url_for('dole_crud.show_doles'))
+
 
 @dole_crud.route('/delete/<id>')
 def delete_dole(id):
@@ -272,16 +306,22 @@ def delete_dole(id):
         app.db.session.commit()
     return redirect(url_for('dole_crud.show_doles'))
 
+
 @dole_crud.route('/update/<id>', methods=['POST'])
 def update_dole(id=None):
     if not (dole := app.db.session.query(Dole).get(id)):
         flash("Dagdeel bestaat niet")
         return redirect(url_for('dole_crud.show_doles'))
     name = request.form.get('dole_name', '')
+    try:
+        hours = int(request.form.get('hours', '1'))
+    except ValueError:
+        flash("Ongeldig getal ingevoerd")
+        return redirect(url_for('dole_crud.show_doles'))
     dole.name = name
+    dole.hours = hours
     app.db.session.commit()
     return redirect(url_for('dole_crud.show_doles'))
-
 
 
 profile_crud = Blueprint('profile_crud', __name__, template_folder='templates', url_prefix='/profiles')
@@ -319,7 +359,7 @@ def delete_profile(id):
     return redirect(url_for('profile_crud.show_profiles'))
 
 @profile_crud.route('/update/<id>', methods=['POST'])
-def update_dole(id=None):
+def update_profile(id=None):
     if not (profile := app.db.session.query(Profile).get(id)):
         flash("Profiel bestaat niet")
         return redirect(url_for('profile_crud.show_profiles'))

@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+      .cell {
+          border:1px solid rgba(0,0,0,0.2);
+      }
+      .checkboxContainer {
+          display: inline-block;
+          vertical-align: top;
+      }
+      .radioContainer {
+          display: inline-block;
+          width: 90px;
+          height: 0px;
+          overflow:hidden;
+          transition: height 0.1s ease;
+      }
+      .radioContainer.opened {
+          height: 45px;
+      }
+      td {
+          vertical-align: top;
+      }
+  </style>
+</head>
+
+<body>
+    <table>
+        <tr>
+            <td>
+                <div class="cell">
+                    <div class="checkboxContainer">
+                        <input class="yourcheckbox" type="checkbox" /> label
+                    </div>
+                    <div class="radioContainer">
+                        <input type="radio" /> option 1<br/>
+                        <input type="radio" /> option 2
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="cell">
+                    <div class="checkboxContainer">
+                        <input class="yourcheckbox" type="checkbox" /> label
+                    </div>
+                    <div class="radioContainer">
+                        <input type="radio" /> option 1<br/>
+                        <input type="radio" /> option 2
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="cell">
+                    <div class="checkboxContainer">
+                        <input class="yourcheckbox" type="checkbox" /> label
+                    </div>
+                    <div class="radioContainer">
+                        <input type="radio" /> option 1<br/>
+                        <input type="radio" /> option 2
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div class="cell">
+                    <div class="checkboxContainer">
+                        <input class="yourcheckbox" type="checkbox" /> label
+                    </div>
+                    <div class="radioContainer">
+                        <input type="radio" /> option 1<br/>
+                        <input type="radio" /> option 2
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="cell">
+                    <div class="checkboxContainer">
+                        <input class="yourcheckbox" type="checkbox" /> label
+                    </div>
+                    <div class="radioContainer">
+                        <input type="radio" /> option 1<br/>
+                        <input type="radio" /> option 2
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="cell">
+                    <div class="checkboxContainer">
+                        <input class="yourcheckbox" type="checkbox" /> label
+                    </div>
+                    <div class="radioContainer">
+                        <input type="radio" /> option 1<br/>
+                        <input type="radio" /> option 2
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div class="cell">
+                    <div class="checkboxContainer">
+                        <input class="yourcheckbox" type="checkbox" /> label
+                    </div>
+                    <div class="radioContainer">
+                        <input type="radio" /> option 1<br/>
+                        <input type="radio" /> option 2
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="cell">
+                    <div class="checkboxContainer">
+                        <input class="yourcheckbox" type="checkbox" /> label
+                    </div>
+                    <div class="radioContainer">
+                        <input type="radio" /> option 1<br/>
+                        <input type="radio" /> option 2
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="cell">
+                    <div class="checkboxContainer">
+                        <input class="yourcheckbox" type="checkbox" /> label
+                    </div>
+                    <div class="radioContainer">
+                        <input type="radio" /> option 1<br/>
+                        <input type="radio" /> option 2
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</body>
+
+
+<script>
+(function(){
+
+    var checkboxes = document.getElementsByClassName('yourcheckbox');
+    for (var i = 0; i < checkboxes.length; i++) {        
+        checkboxes[i].addEventListener('change', (event) => {
+            var checkbox = event.target;
+            var radioContainer = checkbox.parentNode.parentNode.querySelector(".radioContainer");
+            console.log(radioContainer);
+
+            if (checkbox.checked) radioContainer.classList.add("opened");
+            else                  radioContainer.classList.remove("opened");
+        });
+    }
+
+})();
+      
+</script>
+</html>

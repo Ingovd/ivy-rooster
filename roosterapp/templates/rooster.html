@@ -31,11 +31,11 @@
                 <td>{{ client.person.name }}</td>   
                 {% for dole in doles %}
                 <td>
-                    <div class="presence">
-                        <span class="constraint">
-                            <input type="checkbox" id="presence_{{ client.person.id }}_{{ dole.id }}" name="presence_{{ client.person.id }}_{{ dole.id }}"{% if dole.id in rooster[client.person_id] %} checked="checked"{% endif %}>
-                        </span>
-                        <div class="choice">
+                    <div class="cell">
+                        <div class="checkboxContainer">
+                            <input class="ternaryBox" type="checkbox" id="presence_{{ client.person.id }}_{{ dole.id }}" name="presence_{{ client.person.id }}_{{ dole.id }}"{% if dole.id in rooster[client.person_id] %} checked="checked"{% endif %}>
+                        </div>
+                        <div class="radioContainer">
                             <input type="radio" id="present_{{ client.person.id }}_{{ dole.id }}" name="{{ client.person.id }}_{{ dole.id }}" value="present"{% if
                                 (dole.id in rooster[client.person_id]) and (rooster[client.person_id][dole.id]) %} checked="checked"
                                 {% endif %}>
@@ -62,11 +62,11 @@
                 <td>{{ staff.person.name }}</td>   
                 {% for dole in doles %}
                 <td>
-                    <div class="presence">
-                        <span class="constraint">
-                            <input type="checkbox" id="presence_{{ staff.person.id }}_{{ dole.id }}" name="presence_{{ staff.person.id }}_{{ dole.id }}"{% if dole.id in rooster[staff.person_id] %} checked="checked"{% endif %}>
-                        </span>
-                        <div class="choice">
+                    <div class="cell">
+                        <div class="checkboxContainer">
+                            <input class="ternaryBox" type="checkbox" id="presence_{{ staff.person.id }}_{{ dole.id }}" name="presence_{{ staff.person.id }}_{{ dole.id }}"{% if dole.id in rooster[staff.person_id] %} checked="checked"{% endif %}>
+                        </div>
+                        <div class="radioContainer">
                             <input type="radio" id="present_{{ staff.person.id }}_{{ dole.id }}" name="{{ staff.person.id }}_{{ dole.id }}" value="present"{% if
                                 (dole.id in rooster[staff.person_id]) and (rooster[staff.person_id][dole.id]) %} checked="checked"
                                 {% endif %}>
@@ -85,6 +85,29 @@
     </table>
 <input type="submit" value="Opslaan">
 </form>
+
+<script>
+    (function(){
+    
+        document.querySelectorAll('input[class=ternaryBox]:checked').forEach(c => {
+            c.parentNode.parentNode.querySelector(".radioContainer").classList.add("opened");
+        });
+
+        var checkboxes = document.getElementsByClassName('ternaryBox');
+        for (var i = 0; i < checkboxes.length; i++) {        
+            checkboxes[i].addEventListener('change', (event) => {
+                var checkbox = event.target;
+                var radioContainer = checkbox.parentNode.parentNode.querySelector(".radioContainer");
+                console.log(radioContainer);
+    
+                if (checkbox.checked) radioContainer.classList.add("opened");
+                else                  radioContainer.classList.remove("opened");
+            });
+        }
+    
+    })();
+          
+    </script>
 {% endif %}
 
 {% endblock %}

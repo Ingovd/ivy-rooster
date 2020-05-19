@@ -95,20 +95,20 @@ table, td {
 flex: 50%;
 }
 
-.presence {
-    position:relative;
-    top: 0;
-    left: 0;
+.cell {
+    border:0px solid rgba(0,0,0,0.2);
 }
-.presence:after {
-    content: "";
-    clear: both;
-    display: block;
+.checkboxContainer {
+    display: inline-block;
+    vertical-align: top;
 }
-.choice {  
-    display: block;
-    float:left;
+.radioContainer {
+    display: inline-block;
+    width: 90px;
+    height: 0px;
+    overflow:hidden;
+    transition: height 0.1s ease;
 }
-.constraint {
-    float: left;
+.radioContainer.opened {
+    height: 45px;
 }
