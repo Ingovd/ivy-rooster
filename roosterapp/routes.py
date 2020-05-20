@@ -45,7 +45,7 @@ def generate(doles, clients, staffs, sessions):
     # Every kid is scheduled for the right number of doles
     for client in clients:
         i = client.person.id
-        m += xsum(clientVars[i][dole.id] * dole.hours for dole in doles) == client.hours
+        m += client.hours <= xsum(clientVars[i][dole.id] * dole.hours for dole in doles)
         for a in client.person.atttendance:
             if a.present:
                 m += clientVars[i][a.dole.id] == 1
@@ -107,7 +107,10 @@ def boolify_vars(rooster):
     for item, doles in rooster.items():
         for dole, var in doles.items():
             print(var, flush=True)
-            rooster[item][dole] = int(var.x) == 1
+            try:
+                rooster[item][dole] = int(var.x) == 1
+            except:
+                rooster[item][dole] = False
 
 rooster_maker = Blueprint('rooster_maker', __name__, template_folder='templates')
 
@@ -116,7 +119,15 @@ def generate_rooster():
     doles = app.db.session.query(Dole).all()
     clients = app.db.session.query(Client).join(Person).filter(Person.active)
     staffs = app.db.session.query(Staff).join(Person).filter(Person.active)
-    sessions = app.db.session.query(Session).all()
+    clientSessions = {}
+    for client in clients:
+        for session in client.sessions:
+            clientSessions[session.id] = session
+    sessions = []
+    for staff in staffs:
+        for session in staff.sessions:
+            if session.id in clientSessions:
+                sessions.append(session)
 
     print("Generating roosters", flush=True)
     clientRooster, staffRooster, sessionRooster = generate(doles, clients, staffs, sessions)
