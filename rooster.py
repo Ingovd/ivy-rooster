@@ -97,9 +97,9 @@ k = len(clients)
 
 
 sessions = [
-    # session(0, 1, 2),
-    # session(0, 1, 2),
-    # session(5, 4, 3),
+    session(0, 1, 2),
+    session(0, 1, 2),
+    session(5, 4, 3),
     session(8, 4, 1)
 ]
 b = len(sessions)
@@ -119,7 +119,7 @@ slackVars    = [m.add_var(name=f"e_{j}", var_type=CONTINUOUS) for j in range(10)
 
 # Every kid is scheduled for the right number of doles
 for i in range(k):
-    m += xsum(ddClients[i]*4) == clients[i].dd
+    m += xsum(ddClients[i]) == clients[i].dd
     for dole in clients[i].present:
         m += ddClients[i][dole.value] == 1
     for dole in clients[i].absent:
@@ -137,7 +137,7 @@ for i in range(s):
 
 # A session's client is scheduled, its staff isn't
 for i in range(b):
-    m += xsum(ddSessions[i][j] for j in range(10)) == 1
+    m += xsum(ddSessions[i][j] for j in range(k)) == 1
     for dole in Dole:
         j = dole.value
         m+= ddSessions[i][j] + ddClients[sessions[i].client][j] <= 1

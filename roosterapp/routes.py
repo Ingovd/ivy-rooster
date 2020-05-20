@@ -1,4 +1,7 @@
+from collections import defaultdict
 from typing import Callable, Optional
+from mip import *
+
 
 from flask import (Blueprint,
                    render_template,
@@ -13,14 +16,120 @@ from roosterapp.templates.messages import *
 from roosterapp.sql import *
 
 
-rooster_maker = Blueprint('rooster_maker', __name__, template_folder='templates')
+def generate(doles, clients, staffs, sessions):
+    m = Model()
+    slackVars = defaultdict(dict)
+    clientVars = defaultdict(dict)
+    staffVars = defaultdict(dict)
+    sessionVars = defaultdict(dict)
 
+    # All scheduling booleans for clients/staff/sessions
+    for dole in doles:
+        j = dole.id
+        slackVars[j] = m.add_var(name=f"d_{j}", var_type=CONTINUOUS)
+        for client in clients:
+            i = client.person.id
+            clientVars[i][j] = m.add_var(name=f"k_{i}_{j}", var_type=BINARY)
+        for staff in staffs:
+            i = staff.person.id
+            staffVars[i][j] = m.add_var(name=f"s_{i}_{j}", var_type=BINARY)
+        for session in sessions:
+            i = session.id
+            sessionVars[i][j] = m.add_var(name=f"b_{i}_{j}", var_type=BINARY)
+
+    print(slackVars, flush=True)
+    print(clientVars, flush=True)
+    print(staffVars, flush=True)
+    print(sessionVars, flush=True)
+
+    # Every kid is scheduled for the right number of doles
+    for client in clients:
+        i = client.person.id
+        m += xsum(clientVars[i][dole.id] * dole.hours for dole in doles) == client.hours
+        for a in client.person.atttendance:
+            if a.present:
+                m += clientVars[i][a.dole.id] == 1
+            else:
+                m += clientVars[i][a.dole.id] == 0
+        clientSessionVars = []
+        for session in sessions:
+            if session.client.person.id == client.person.id:
+                clientSessionVars.append(session)
+        for dole in doles:
+            m += xsum(session.hours*sessionVars[session.id][dole.id] for session in clientSessionVars) <= dole.hours
+
+
+    # Set staffing vars based on present/absent input
+    for staff in staffs:
+        i = staff.person.id
+        for a in staff.person.atttendance:
+            if a.present:
+                m += staffVars[i][a.dole.id] == 1
+            else:
+                m += staffVars[i][a.dole.id] == 0
+        staffSessionVars = []
+        for session in sessions:
+            if session.staff.person.id == staff.person.id:
+                staffSessionVars.append(session)
+        for dole in doles:
+            m += xsum(session.hours*sessionVars[session.id][dole.id] for session in staffSessionVars) <= dole.hours
+
+
+    # A session's client is scheduled, its staff isn't
+    for session in sessions:
+        i = session.id
+        m += xsum(sessionVars[i][dole.id] for dole in doles) == 1
+        for dole in doles:
+            j = dole.id
+            # For b = sessionVars[i][j]
+            #     x = clientVars[session.client.person.id][j]
+            #     s = staffVars[session.staff.person.id][j]
+            # encode: b -> x & !s
+            m+= sessionVars[i][j] + staffVars[session.staff.person.id][j] <= 1
+            m+= sessionVars[i][j] <= clientVars[session.client.person.id][j]
+
+    # Per dole the sum of adjusted kid-hours plus slack equals the staffing
+    for dole in doles:
+        j = dole.id
+        m += xsum(clientVars[client.person.id][j] / client.profile.ratio
+                    for client in clients) + slackVars[j] == xsum(staffVars[staff.person.id][j] for staff in staffs)
+
+    m.objective = minimize(xsum(slackVars[dole.id] for dole in doles))
+    m.optimize()
+
+    boolify_vars(clientVars)
+    boolify_vars(staffVars)
+    boolify_vars(sessionVars)
+
+    return clientVars, staffVars, sessionVars
+
+def boolify_vars(rooster):
+    for item, doles in rooster.items():
+        for dole, var in doles.items():
+            print(var, flush=True)
+            rooster[item][dole] = int(var.x) == 1
+
+rooster_maker = Blueprint('rooster_maker', __name__, template_folder='templates')
 
 @rooster_maker.route('/rooster', methods=['POST'])
 def generate_rooster():
+    doles = app.db.session.query(Dole).all()
     clients = app.db.session.query(Client).join(Person).filter(Person.active)
     staffs = app.db.session.query(Staff).join(Person).filter(Person.active)
-    return redirect(url_for('rooster_maker.show_rooster'))
+    sessions = app.db.session.query(Session).all()
+
+    print("Generating roosters", flush=True)
+    clientRooster, staffRooster, sessionRooster = generate(doles, clients, staffs, sessions)
+    personSessions = defaultdict(lambda : defaultdict(list))
+    for session in sessions:
+        for dole in doles:
+            if sessionRooster[session.id][dole.id]:
+                personSessions[session.client.person.id][dole.id].append(session)
+                personSessions[session.staff.person.id][dole.id].append(session)
+
+    return render_template('complete_rooster.html',
+        clientRooster=clientRooster, staffRooster=staffRooster, personSessions=personSessions,
+        doles=doles, clients=clients, staffs=staffs, sessions=sessions)
     
 
 @rooster_maker.route('/', methods=['GET'])
@@ -212,8 +321,14 @@ def update_client(id=None):
         return redirect(url_for('client_crud.show_clients'))
     name = request.form.get('client_name', '')
     profile_id = request.form.get('profile_id', '')
+    try:
+        hours = int(request.form.get('hours', '1'))
+    except ValueError:
+        flash("Ongeldig getal ingevoerd")
+        return redirect(url_for('client_crud.show_clients'))
     client.person.name = name
     client.profile_id = profile_id
+    client.hours = hours
     app.db.session.commit()
     return redirect(url_for('client_crud.show_clients'))
 
@@ -238,10 +353,16 @@ def show_update_staff(id):
 @staff_crud.route('/add', methods=['POST'])
 def create_staff():
     name = request.form.get('staff_name', '')
+    try:
+        min_hours = int(request.form.get('min_hours', '1'))
+        max_hours = int(request.form.get('max_hours', '1'))
+    except ValueError:
+        flash("Ongeldig getal ingevoerd")
+        return redirect(url_for('staff_crud.show_staffs'))
     person = Person(name=name)
     app.db.session.add(person)
     app.db.session.commit()
-    staff = Staff(person_id = person.id)
+    staff = Staff(person_id = person.id, min_hours=min_hours, max_hours=max_hours)
     app.db.session.add(staff)
     app.db.session.commit()
     return redirect(url_for('staff_crud.show_staffs'))
@@ -263,7 +384,15 @@ def update_staff(id=None):
         flash("Medewerker bestaat niet")
         return redirect(url_for('staff_crud.show_staffs'))
     name = request.form.get('staff_name', '')
+    try:
+        min_hours = int(request.form.get('min_hours', '1'))
+        max_hours = int(request.form.get('max_hours', '1'))
+    except ValueError:
+        flash("Ongeldig getal ingevoerd")
+        return redirect(url_for('staff_crud.show_staffs'))
     staff.person.name = name
+    staff.min_hours = min_hours
+    staff.max_hours = max_hours
     app.db.session.commit()
     return redirect(url_for('staff_crud.show_staffs'))
 

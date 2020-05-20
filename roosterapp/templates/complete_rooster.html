@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Ivy Rooster</title>
+{% endblock %}
+
+{% block body %}
+<h1> Rooster </h1>
+
+
+
+
+<table style="width: 50em;">
+    <tr>
+        <th></th>
+        {% for dole in doles %}
+        <th>{{  dole.name }}</th>
+        {% endfor %}
+    </tr>
+    {% for client in clients %}
+        <tr>
+            <td>{{ client.person.name }}</td>   
+            {% for dole in doles %}
+            <td class="{% if clientRooster[client.person.id][dole.id] %}present{% else %}absent{% endif %}">
+                {% for session in personSessions[client.person.id][dole.id] %}
+                    {{ session.staff.person.name }}<br>
+                {% endfor %}
+            </td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+    <tr>
+        <th></th>
+        {% for dole in doles %}
+        <th>{{  dole.name }}</th>
+        {% endfor %}
+    </tr>
+    {% for staff in staffs %}
+        <tr>
+            <td>{{ staff.person.name }}</td>   
+            {% for dole in doles %}
+            <td class="{% if staffRooster[staff.person.id][dole.id] %}present{% else %}absent{% endif %}">
+                {% for session in personSessions[staff.person.id][dole.id] %}
+                    {{ session.client.person.name }}<br>
+                {% endfor %}
+            </td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
+
+
+{% endblock %}
