@@ -1,5 +1,7 @@
 runtime: python37
 
+entrypoint: python wsgi.py
+
 handlers:
 - url: /.*
   script: auto
