@@ -18,7 +18,8 @@ from roosterapp.sql import *
 
 def generate(doles, clients, staffs, sessions):
     m = Model()
-    slackVars = defaultdict(dict)
+    doleSlackVars = defaultdict(dict)
+    clientSlackVars = defaultdict(dict)
     clientVars = defaultdict(dict)
     staffVars = defaultdict(dict)
     sessionVars = defaultdict(dict)
@@ -26,7 +27,6 @@ def generate(doles, clients, staffs, sessions):
     # All scheduling booleans for clients/staff/sessions
     for dole in doles:
         j = dole.id
-        slackVars[j] = m.add_var(name=f"d_{j}", var_type=CONTINUOUS)
         for client in clients:
             i = client.person.id
             clientVars[i][j] = m.add_var(name=f"k_{i}_{j}", var_type=BINARY)
@@ -37,7 +37,15 @@ def generate(doles, clients, staffs, sessions):
             i = session.id
             sessionVars[i][j] = m.add_var(name=f"b_{i}_{j}", var_type=BINARY)
 
-    print(slackVars, flush=True)
+    # Slack vars for objective function
+    for client in clients:
+        i = client.person.id
+        clientSlackVars[i] = m.add_var(name=f"e_{i}", var_type=CONTINUOUS)
+    for dole in doles:
+        j = dole.id
+        doleSlackVars[j] = m.add_var(name=f"d_{j}", var_type=CONTINUOUS)
+
+    print(doleSlackVars, flush=True)
     print(clientVars, flush=True)
     print(staffVars, flush=True)
     print(sessionVars, flush=True)
@@ -45,7 +53,8 @@ def generate(doles, clients, staffs, sessions):
     # Every kid is scheduled for the right number of doles
     for client in clients:
         i = client.person.id
-        m += client.hours <= xsum(clientVars[i][dole.id] * dole.hours for dole in doles)
+        m += 0 <= clientSlackVars[i]
+        m += client.hours + clientSlackVars[i] == xsum(clientVars[i][dole.id] * dole.hours for dole in doles)
         for a in client.person.atttendance:
             if a.present:
                 m += clientVars[i][a.dole.id] == 1
@@ -92,9 +101,10 @@ def generate(doles, clients, staffs, sessions):
     for dole in doles:
         j = dole.id
         m += xsum(clientVars[client.person.id][j] / client.profile.ratio
-                    for client in clients) + slackVars[j] == xsum(staffVars[staff.person.id][j] for staff in staffs)
+                    for client in clients) + doleSlackVars[j] == xsum(staffVars[staff.person.id][j] for staff in staffs)
 
-    m.objective = minimize(xsum(slackVars[dole.id] for dole in doles))
+    m.objective = minimize(
+        xsum(doleSlackVars[dole.id] for dole in doles) + xsum(clientSlackVars[client.person.id] / client.profile.ratio for client in clients))
     m.optimize()
 
     boolify_vars(clientVars)

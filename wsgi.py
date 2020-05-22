@@ -17,6 +17,8 @@ def main():
     parser.add_argument('-p', '--path', help=CLI_PATH_HELP, nargs='?')
 
     args = parser.parse_args()
+    if args.path is None:
+        args.path = "/roosters"
     path = setup_instance_path(args.path)
 
     config = {'INSTANCE_PATH': path}
