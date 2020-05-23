@@ -24,21 +24,21 @@ class Presence(Base):
 class Dole(Base):
     __tablename__ = 'doles'
     id = Column(Integer, primary_key = True)
-    name = Column(String)
+    name = Column(String(127))
     hours = Column(Integer, default=1)
     occupation = relationship("Presence", backref="dole", cascade="delete, delete-orphan")
 
 class Person(Base):
     __tablename__ = 'persons'
     id = Column(Integer, primary_key=True)
-    name = Column(String)
+    name = Column(String(127))
     active = Column(Boolean, default=True)
     atttendance = relationship("Presence", backref="person", cascade="delete, delete-orphan")
 
 class Profile(Base):
     __tablename__ = 'profiles'
     id = Column(Integer, primary_key=True)
-    name = Column(String)
+    name = Column(String(127))
     ratio = Column(Integer)
     clients = relationship("Client", backref="profile")
 
