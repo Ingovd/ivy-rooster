@@ -22,13 +22,15 @@
     <table style="width: 50em;">
         <tr>
             <th></th>
+            <th>Groepuren</th>
             {% for dole in doles %}
             <th>{{  dole.name }}</th>
             {% endfor %}
         </tr>
         {% for client in clients %}
             <tr>
-                <td>{{ client.person.name }}</td>   
+                <td>{{ client.person.name }}</td>
+                <td>{{ client.person.present_sum }} ≤ {{ client.hours }} ≤ {{ week_hours - client.person.absent_sum }}</td>
                 {% for dole in doles %}
                 <td>
                     <div class="cell">
@@ -53,13 +55,15 @@
         {% endfor %}
         <tr>
             <th></th>
+            <th>Groepuren</th>
             {% for dole in doles %}
             <th>{{  dole.name }}</th>
             {% endfor %}
         </tr>
         {% for staff in staffs %}
             <tr>
-                <td>{{ staff.person.name }}</td>   
+                <td>{{ staff.person.name }}</td>
+                <td>{{ staff.min_hours }} ≤ {{ week_hours - staff.person.absent_sum }}, {{ staff.person.present_sum }} ≤ {{ staff.max_hours }}</td>
                 {% for dole in doles %}
                 <td>
                     <div class="cell">

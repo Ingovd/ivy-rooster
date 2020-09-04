@@ -164,17 +164,26 @@ def show_rooster():
     for staff in staffs:
         rooster[staff.person.id] = {}
     doles = app.db.session.query(Dole).all()
+    week_hours = sum(dole.hours for dole in doles)
 
     client_ids = [client.person_id for client in clients]
     staff_ids = [staff.person_id for staff in staffs]
-    person_ids = client_ids + staff_ids
-    presences = app.db.session.query(Presence).filter(Presence.person_id.in_(person_ids))
+    persons = [client.person for client in clients] + [staff.person for staff in staffs]
+    for person in persons:
+        person.present_sum = 0
+        person.absent_sum = 0
+
+    presences = app.db.session.query(Presence).filter(Presence.person_id.in_([person.id for person in persons]))
     for presence in presences:
         rooster[presence.person_id][presence.dole_id] = presence.present
+        if presence.present:
+            presence.person.present_sum += presence.dole.hours
+        else:
+            presence.person.absent_sum += presence.dole.hours
     
     session['rooster'] = rooster
 
-    return render_template('rooster.html', staffs=staffs, clients=clients, doles=doles, rooster=rooster)
+    return render_template('rooster.html', week_hours=week_hours, staffs=staffs, clients=clients, doles=doles, rooster=rooster)
 
 
 @rooster_maker.route('/presence/update', methods=['POST'])
@@ -187,20 +196,32 @@ def update_rooster():
     staff_ids = [staff.person_id for staff in staffs]
     person_ids = client_ids + staff_ids
 
-    app.db.session.query(Presence).delete()
-    app.db.session.commit()
+    # app.db.session.query(Presence).delete()
+    # app.db.session.commit()
+
+    rooster = session.get('rooster', {});
 
     for person_id in person_ids:
         for dole in doles:
             form_id = f"{person_id}_{dole.id}"
             if f"presence_{form_id}" not in request.form:
-                continue
-            if form_id in request.form:
+                # Check of the old rooster had a presence
+                if str(dole.id) in rooster.get(str(person_id), {}):
+                    # Delete it if it exists
+                    app.db.session.query(Presence).filter(Presence.person_id == person_id, Presence.dole_id == dole.id).delete()
+            elif form_id in request.form:
                 present = request.form[form_id] == "present"
-                presence = Presence(person_id=person_id, dole_id=dole.id, present=present)
-                app.db.session.add(presence)
+                if dole.id not in rooster.get(person_id, {}) or rooster[person_id][dole.id] != present:
+                    if presence := app.db.session.query(Presence).filter(Presence.person_id == person_id, Presence.dole_id == dole.id).first():
+                        presence.present = present
+                    else:
+                        presence = Presence(person_id=person_id, dole_id=dole.id, present=present)
+                        app.db.session.add(presence)
 
-    app.db.session.commit()
+    try:
+        app.db.session.commit()
+    except:
+        flash("Er ging iets fout bij het opslaan van de informatie")
     return redirect(url_for('rooster_maker.show_rooster'))
 
 
