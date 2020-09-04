@@ -25,6 +25,12 @@ def generate(doles, clients, staffs, sessions):
     staffVars = defaultdict(dict)
     sessionVars = defaultdict(dict)
 
+    # Constants based on input
+    # Number of hours each staff member is assigned
+    staffSessionHours = defaultdict(lambda: 0)
+    for session in sessions:
+        staffSessionHours[session.staff.person_id] += session.hours
+
     # All scheduling booleans for clients/staff/sessions
     for dole in doles:
         j = dole.id
@@ -46,10 +52,10 @@ def generate(doles, clients, staffs, sessions):
         j = dole.id
         doleSlackVars[j] = m.add_var(name=f"d_{j}", var_type=CONTINUOUS)
 
-    print(doleSlackVars, flush=True)
-    print(clientVars, flush=True)
-    print(staffVars, flush=True)
-    print(sessionVars, flush=True)
+    # print(doleSlackVars, flush=True)
+    # print(clientVars, flush=True)
+    # print(staffVars, flush=True)
+    # print(sessionVars, flush=True)
 
     # Every kid is scheduled for the right number of doles
     for client in clients:
@@ -72,6 +78,9 @@ def generate(doles, clients, staffs, sessions):
     # Set staffing vars based on present/absent input
     for staff in staffs:
         i = staff.person.id
+        m += staff.min_hours <= xsum(dole.hours * staffVars[i][dole.id] for dole in doles)
+        m += xsum(dole.hours * staffVars[i][dole.id] for dole in doles) <= staff.max_hours
+
         for a in staff.person.atttendance:
             if a.present:
                 m += staffVars[i][a.dole.id] == 1
@@ -143,15 +152,25 @@ def generate_rooster():
     print("Generating roosters", flush=True)
     clientRooster, staffRooster, sessionRooster = generate(doles, clients, staffs, sessions)
     personSessions = defaultdict(lambda : defaultdict(list))
+    personHours = defaultdict(lambda: 0)
     for session in sessions:
-        for dole in doles:
+        personHours[session.staff.person_id] += session.hours
+    for dole in doles:
+        for session in sessions:
             if sessionRooster[session.id][dole.id]:
                 personSessions[session.client.person.id][dole.id].append(session)
                 personSessions[session.staff.person.id][dole.id].append(session)
+        for client in clients:
+            if clientRooster[client.person_id][dole.id]:
+                personHours[client.person_id] += dole.hours
+        for staff in staffs:
+            if staffRooster[staff.person_id][dole.id]:
+                personHours[staff.person_id] += dole.hours
+
 
     return render_template('complete_rooster.html',
         clientRooster=clientRooster, staffRooster=staffRooster, personSessions=personSessions,
-        doles=doles, clients=clients, staffs=staffs, sessions=sessions)
+        personHours=personHours, doles=doles, clients=clients, staffs=staffs, sessions=sessions)
     
 
 @rooster_maker.route('/', methods=['GET'])
