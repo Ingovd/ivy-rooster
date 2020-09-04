@@ -11,7 +11,7 @@
     <label for="dole_name">Profielnaam:</label><br>
     <input type="text" name="dole_name" id="dole_name" value="{{ dole.name }}" style="width: 50%;"><br>
     <label for="hours">Uren:</label><br>
-    <input type="text" name="hours" id="hours" value="4" style="width: 50%;"><br>
+    <input type="text" name="hours" id="hours" value="{{ dole.hours }}" style="width: 50%;"><br>
     <input type="submit" value="Aanpassen">
 </form>
 {% endblock %}
