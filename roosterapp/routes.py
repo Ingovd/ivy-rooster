@@ -6,6 +6,7 @@ from mip import *
 from flask import (Blueprint,
                    render_template,
                    request,
+                   session,
                    redirect,
                    abort,
                    flash,
@@ -171,6 +172,8 @@ def show_rooster():
     for presence in presences:
         rooster[presence.person_id][presence.dole_id] = presence.present
     
+    session['rooster'] = rooster
+
     return render_template('rooster.html', staffs=staffs, clients=clients, doles=doles, rooster=rooster)
 
 
