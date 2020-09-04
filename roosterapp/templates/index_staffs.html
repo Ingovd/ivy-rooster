@@ -42,8 +42,10 @@
 <form action="/staffs/add" method="POST" style="width:50em;text-align: center;">
     <label for="staff_name">Naam medewerker:</label><br>
     <input type="text" name="staff_name" id="staff_name" value="Nieuwe medewerker" style="width: 50%;"><br>
+    <label for="min_hours">Min. werkuren:</label><br>
     <input type="text" name="min_hours" id="min_hours" value="0" style="width: 50%;"><br>
-    <input type="text" name="max_hours" id="max_hours" value="0" style="width: 50%;"><br>
+    <label for="max_hours">Max. werkuren:</label><br>
+    <input type="text" name="max_hours" id="max_hours" value="30" style="width: 50%;"><br>
     <input type="submit" value="Toevoegen">
 </form>
 {% endblock %}
