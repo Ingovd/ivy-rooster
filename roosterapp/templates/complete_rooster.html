@@ -23,7 +23,7 @@
             <td>{{ client.person.name }}</td>
             <td>{{ personHours[client.person.id] }} ({{ client.hours }})</td>
             {% for dole in doles %}
-            <td class="{% if clientRooster[client.person.id][dole.id] %}present{% else %}absent{% endif %}">
+            <td class="{% if clientRooster[client.person.id][dole.id] %}group{% elif personSessions[client.person.id][dole.id]|length > 0 %}present{% else %}absent{% endif %}">
                 {% for session in personSessions[client.person.id][dole.id] %}
                     {{ session.staff.person.name }}<br>
                 {% endfor %}
@@ -43,7 +43,7 @@
             <td>{{ staff.person.name }}</td>
             <td>{{ staff.min_hours }} ≤ {{ personHours[staff.person.id] }} ≤ {{ staff.max_hours}}</td>
             {% for dole in doles %}
-            <td class="{% if staffRooster[staff.person.id][dole.id] %}present{% else %}absent{% endif %}">
+            <td class="{% if staffRooster[staff.person.id][dole.id] %}group{% elif personSessions[staff.person.id][dole.id]|length > 0 %}present{% else %}absent{% endif %}">
                 {% for session in personSessions[staff.person.id][dole.id] %}
                     {{ session.client.person.name }}<br>
                 {% endfor %}

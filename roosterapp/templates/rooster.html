@@ -36,17 +36,24 @@
                     <div class="cell">
                         <div class="checkboxContainer">
                             <input class="ternaryBox" type="checkbox" id="presence_{{ client.person.id }}_{{ dole.id }}" name="presence_{{ client.person.id }}_{{ dole.id }}"{% if dole.id in rooster[client.person_id] %} checked="checked"{% endif %}>
+                            <label for="presence_{{ client.person.id }}_{{ dole.id }}">Kies</label>
                         </div>
+                        <br>
                         <div class="radioContainer">
-                            <input type="radio" id="present_{{ client.person.id }}_{{ dole.id }}" name="{{ client.person.id }}_{{ dole.id }}" value="present"{% if
-                                (dole.id in rooster[client.person_id]) and (rooster[client.person_id][dole.id]) %} checked="checked"
-                                {% endif %}>
-                            <label for="present_{{ client.person.id }}_{{ dole.id }}">Aanwezig</label>
-                            <br>
-                            <input type="radio" id="absent_{{ client.person.id }}_{{ dole.id }}" name="{{ client.person.id }}_{{ dole.id }}" value="absent"{% if
-                                (dole.id in rooster[client.person_id]) and (not rooster[client.person_id][dole.id]) %} checked="checked"
+                            <input type="radio" id="absent_{{ client.person.id }}_{{ dole.id }}" name="{{ client.person.id }}_{{ dole.id }}" value="0"{% if
+                                (dole.id in rooster[client.person_id]) and (rooster[client.person_id][dole.id] == 0) %} checked="checked"
                                 {% endif %}>
                             <label for="absent_{{ client.person.id }}_{{ dole.id }}">Afwezig</label>
+                            <br>
+                            <input type="radio" id="group_{{ client.person.id }}_{{ dole.id }}" name="{{ client.person.id }}_{{ dole.id }}" value="1"{% if
+                                (dole.id in rooster[client.person_id]) and (rooster[client.person_id][dole.id] == 1) %} checked="checked"
+                                {% endif %}>
+                            <label for="group_{{ client.person.id }}_{{ dole.id }}">Groep</label>
+                            <br>
+                            <input type="radio" id="ib_{{ client.person.id }}_{{ dole.id }}" name="{{ client.person.id }}_{{ dole.id }}" value="2"{% if
+                                (dole.id in rooster[client.person_id]) and (rooster[client.person_id][dole.id] == 2) %} checked="checked"
+                                {% endif %}>
+                            <label for="ib_{{ client.person.id }}_{{ dole.id }}">IB</label>
                         </div>
                     </div>
                 </td>
@@ -69,17 +76,24 @@
                     <div class="cell">
                         <div class="checkboxContainer">
                             <input class="ternaryBox" type="checkbox" id="presence_{{ staff.person.id }}_{{ dole.id }}" name="presence_{{ staff.person.id }}_{{ dole.id }}"{% if dole.id in rooster[staff.person_id] %} checked="checked"{% endif %}>
+                            <label for="presence_{{ staff.person.id }}_{{ dole.id }}">Aanwezig</label>
                         </div>
+                        <br>
                         <div class="radioContainer">
-                            <input type="radio" id="present_{{ staff.person.id }}_{{ dole.id }}" name="{{ staff.person.id }}_{{ dole.id }}" value="present"{% if
-                                (dole.id in rooster[staff.person_id]) and (rooster[staff.person_id][dole.id]) %} checked="checked"
-                                {% endif %}>
-                            <label for="present_{{ staff.person.id }}_{{ dole.id }}">Aanwezig</label>
-                            <br>
-                            <input type="radio" id="absent_{{ staff.person.id }}_{{ dole.id }}" name="{{ staff.person.id }}_{{ dole.id }}" value="absent"{% if
-                                (dole.id in rooster[staff.person_id]) and (not rooster[staff.person_id][dole.id]) %} checked="checked"
+                            <input type="radio" id="absent_{{ staff.person.id }}_{{ dole.id }}" name="{{ staff.person.id }}_{{ dole.id }}" value="0"{% if
+                                (dole.id in rooster[staff.person_id]) and (rooster[staff.person_id][dole.id] == 0) %} checked="checked"
                                 {% endif %}>
                             <label for="absent_{{ staff.person.id }}_{{ dole.id }}">Afwezig</label>
+                            <br>
+                            <input type="radio" id="group_{{ staff.person.id }}_{{ dole.id }}" name="{{ staff.person.id }}_{{ dole.id }}" value="1"{% if
+                                (dole.id in rooster[staff.person_id]) and (rooster[staff.person_id][dole.id] == 1) %} checked="checked"
+                                {% endif %}>
+                            <label for="group_{{ staff.person.id }}_{{ dole.id }}">Groep</label>
+                            <br>
+                            <input type="radio" id="ib_{{ staff.person.id }}_{{ dole.id }}" name="{{ staff.person.id }}_{{ dole.id }}" value="2"{% if
+                                (dole.id in rooster[staff.person_id]) and (rooster[staff.person_id][dole.id] == 2) %} checked="checked"
+                                {% endif %}>
+                            <label for="ib_{{ staff.person.id }}_{{ dole.id }}">IB</label>
                         </div>
                     </div>
                 </td>

@@ -89,6 +89,10 @@ table, td {
 }
 
 .present {
+    background-color: lightyellow;
+}
+
+.group {
     background-color: lightgreen;
 }
 
@@ -111,5 +115,5 @@ table, td {
     transition: height 0.1s ease;
 }
 .radioContainer.opened {
-    height: 45px;
+    height: 60px;
 }

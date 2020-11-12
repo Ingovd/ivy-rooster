@@ -21,8 +21,10 @@ def generate(doles, clients, staffs, sessions):
     m = Model()
     doleSlackVars = defaultdict(dict)
     clientSlackVars = defaultdict(dict)
-    clientVars = defaultdict(dict)
-    staffVars = defaultdict(dict)
+    clientGroup = defaultdict(dict)
+    clientPresent = defaultdict(dict)
+    staffGroup = defaultdict(dict)
+    staffPresent = defaultdict(dict)
     sessionVars = defaultdict(dict)
 
     # Constants based on input
@@ -36,10 +38,16 @@ def generate(doles, clients, staffs, sessions):
         j = dole.id
         for client in clients:
             i = client.person.id
-            clientVars[i][j] = m.add_var(name=f"k_{i}_{j}", var_type=BINARY)
+            clientGroup[i][j] = m.add_var(name=f"k_{i}_{j}", var_type=BINARY)
+            clientPresent[i][j] = m.add_var(name=f"cpresent_{i}_{j}", var_type=BINARY)
+            # Group attendance implies presence
+            m += clientGroup[i][j] <= clientPresent[i][j]
         for staff in staffs:
             i = staff.person.id
-            staffVars[i][j] = m.add_var(name=f"s_{i}_{j}", var_type=BINARY)
+            staffGroup[i][j] = m.add_var(name=f"s_{i}_{j}", var_type=BINARY)
+            staffPresent[i][j] = m.add_var(name=f"spresent_{i}_{j}", var_type=BINARY)
+            # Group duty implies presence
+            m += staffGroup[i][j] <= staffPresent[i][j]
         for session in sessions:
             i = session.id
             sessionVars[i][j] = m.add_var(name=f"b_{i}_{j}", var_type=BINARY)
@@ -61,12 +69,14 @@ def generate(doles, clients, staffs, sessions):
     for client in clients:
         i = client.person.id
         m += 0 <= clientSlackVars[i]
-        m += client.hours + clientSlackVars[i] == xsum(clientVars[i][dole.id] * dole.hours for dole in doles)
+        m += client.hours + clientSlackVars[i] == xsum(clientGroup[i][dole.id] * dole.hours for dole in doles)
         for a in client.person.atttendance:
-            if a.present:
-                m += clientVars[i][a.dole.id] == 1
+            if a.present == 0:
+                m += clientPresent[i][a.dole.id] == 0
+            elif a.present == 1:
+                m += clientGroup[i][a.dole.id] == 1
             else:
-                m += clientVars[i][a.dole.id] == 0
+                m += clientGroup[i][a.dole.id] == 0
         clientSessionVars = []
         for session in sessions:
             if session.client.person.id == client.person.id:
@@ -78,14 +88,16 @@ def generate(doles, clients, staffs, sessions):
     # Set staffing vars based on present/absent input
     for staff in staffs:
         i = staff.person.id
-        m += staff.min_hours <= xsum(dole.hours * staffVars[i][dole.id] for dole in doles)
-        m += xsum(dole.hours * staffVars[i][dole.id] for dole in doles) <= staff.max_hours
+        m += staff.min_hours <= xsum(dole.hours * staffGroup[i][dole.id] for dole in doles)
+        m += xsum(dole.hours * staffGroup[i][dole.id] for dole in doles) <= staff.max_hours
 
         for a in staff.person.atttendance:
-            if a.present:
-                m += staffVars[i][a.dole.id] == 1
+            if a.present == 0:
+                m += staffPresent[i][a.dole.id] == 0
+            elif a.present == 1:
+                m += staffGroup[i][a.dole.id] == 1
             else:
-                m += staffVars[i][a.dole.id] == 0
+                m += staffGroup[i][a.dole.id] == 0
         staffSessionVars = []
         for session in sessions:
             if session.staff.person.id == staff.person.id:
@@ -97,31 +109,33 @@ def generate(doles, clients, staffs, sessions):
     # A session's client is scheduled, its staff isn't
     for session in sessions:
         i = session.id
+        # Every session is scheduled on exactly one dole
         m += xsum(sessionVars[i][dole.id] for dole in doles) == 1
         for dole in doles:
             j = dole.id
-            # For b = sessionVars[i][j]
-            #     x = clientVars[session.client.person.id][j]
-            #     s = staffVars[session.staff.person.id][j]
-            # encode: b -> x & !s
-            m+= sessionVars[i][j] + staffVars[session.staff.person.id][j] <= 1
-            m+= sessionVars[i][j] <= clientVars[session.client.person.id][j]
+            # Session can only be scheduled if staff and client are present
+            m+= sessionVars[i][j] <= staffPresent[session.staff.person.id][j]
+            m+= sessionVars[i][j] <= clientPresent[session.client.person.id][j]
+            # Session can only be scheduled if staff is not scheduled for group
+            m+= sessionVars[i][j] + staffGroup[session.staff.person.id][j] <= 1 
 
     # Per dole the sum of adjusted kid-hours plus slack equals the staffing
     for dole in doles:
         j = dole.id
-        m += xsum(clientVars[client.person.id][j] / client.profile.ratio
-                    for client in clients) + doleSlackVars[j] == xsum(staffVars[staff.person.id][j] for staff in staffs)
+        m += xsum(clientGroup[client.person.id][j] / client.profile.ratio
+                    for client in clients) + doleSlackVars[j] == xsum(staffGroup[staff.person.id][j] for staff in staffs)
 
     m.objective = minimize(
-        xsum(doleSlackVars[dole.id] for dole in doles) + xsum(clientSlackVars[client.person.id] / client.profile.ratio for client in clients))
+        (xsum(doleSlackVars[dole.id] for dole in doles)
+        + xsum(clientSlackVars[client.person.id] / client.profile.ratio for client in clients)) * 10000
+        + xsum(clientPresent[client.person.id][dole.id] for dole in doles for client in clients))
     m.optimize()
 
-    boolify_vars(clientVars)
-    boolify_vars(staffVars)
+    boolify_vars(clientGroup)
+    boolify_vars(staffGroup)
     boolify_vars(sessionVars)
 
-    return clientVars, staffVars, sessionVars
+    return clientGroup, staffGroup, sessionVars
 
 def boolify_vars(rooster):
     for item, doles in rooster.items():
@@ -229,7 +243,7 @@ def update_rooster():
                     # Delete it if it exists
                     app.db.session.query(Presence).filter(Presence.person_id == person_id, Presence.dole_id == dole.id).delete()
             elif form_id in request.form:
-                present = request.form[form_id] == "present"
+                present = int(request.form[form_id])
                 if dole.id not in rooster.get(person_id, {}) or rooster[person_id][dole.id] != present:
                     if presence := app.db.session.query(Presence).filter(Presence.person_id == person_id, Presence.dole_id == dole.id).first():
                         presence.present = present
@@ -289,11 +303,10 @@ def show_update_session(id):
 
 @session_crud.route('/add', methods=['POST'])
 def create_session():
-    print(request.form)
     client_id = request.form.get('client_id', '')
     staff_id = request.form.get('staff_id', '')
     try:
-        hours = int(request.form.get('hours', '1'))
+        hours = float(request.form.get('hours', '1'))
     except ValueError:
         flash("Ongeldig getal ingevoerd")
         return redirect(url_for('session_crud.show_sessions'))
@@ -319,7 +332,7 @@ def update_client(id=None):
     client_id = request.form.get('client_id', '')
     staff_id = request.form.get('staff_id', '')
     try:
-        hours = int(request.form.get('hours', '1'))
+        hours = float(request.form.get('hours', '1'))
     except ValueError:
         flash("Ongeldig getal ingevoerd")
         return redirect(url_for('session_crud.show_sessions'))
@@ -354,7 +367,7 @@ def create_client():
     print(request.form)
     name = request.form.get('client_name', '')
     try:
-        hours = int(request.form.get('hours', '1'))
+        hours = float(request.form.get('hours', '1'))
     except ValueError:
         flash("Ongeldig getal ingevoerd")
         return redirect(url_for('client_crud.show_clients'))
@@ -386,7 +399,7 @@ def update_client(id=None):
     name = request.form.get('client_name', '')
     profile_id = request.form.get('profile_id', '')
     try:
-        hours = int(request.form.get('hours', '1'))
+        hours = float(request.form.get('hours', '1'))
     except ValueError:
         flash("Ongeldig getal ingevoerd")
         return redirect(url_for('client_crud.show_clients'))
@@ -418,8 +431,8 @@ def show_update_staff(id):
 def create_staff():
     name = request.form.get('staff_name', '')
     try:
-        min_hours = int(request.form.get('min_hours', '1'))
-        max_hours = int(request.form.get('max_hours', '1'))
+        min_hours = float(request.form.get('min_hours', '1'))
+        max_hours = float(request.form.get('max_hours', '1'))
     except ValueError:
         flash("Ongeldig getal ingevoerd")
         return redirect(url_for('staff_crud.show_staffs'))
@@ -482,7 +495,7 @@ def show_update_dole(id):
 def create_dole():
     name = request.form.get('dole_name', '')
     try:
-        hours = int(request.form.get('hours', '1'))
+        hours = float(request.form.get('hours', '1'))
     except ValueError:
         flash("Ongeldig getal ingevoerd")
         return redirect(url_for('dole_crud.show_doles'))
@@ -507,7 +520,7 @@ def update_dole(id=None):
         return redirect(url_for('dole_crud.show_doles'))
     name = request.form.get('dole_name', '')
     try:
-        hours = int(request.form.get('hours', '1'))
+        hours = float(request.form.get('hours', '1'))
     except ValueError:
         flash("Ongeldig getal ingevoerd")
         return redirect(url_for('dole_crud.show_doles'))
@@ -535,7 +548,7 @@ def show_update_profile(id):
 def create_profile():
     name = request.form.get('profile_name', '')
     try:
-        ratio = int(request.form.get('profile_ratio', '1'))
+        ratio = float(request.form.get('profile_ratio', '1'))
     except ValueError:
         flash("Ongeldig getal ingevoerd")
         return redirect(url_for('profile_crud.show_profiles'))
@@ -558,7 +571,7 @@ def update_profile(id=None):
         return redirect(url_for('profile_crud.show_profiles'))
     name = request.form.get('profile_name', '')
     try:
-        ratio = int(request.form.get('profile_ratio', '1'))
+        ratio = float(request.form.get('profile_ratio', '1'))
     except ValueError:
         flash("Ongeldig getal ingevoerd")
         return redirect(url_for('profile_crud.show_profiles'))

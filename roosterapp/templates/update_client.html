@@ -13,9 +13,9 @@
     <label for="hours">Aantal groepuren:</label><br>
     <input type="text" name="hours" id="hours" value="{{ client.hours }}" style="width: 50%;"><br>
     <label for="profile_id">Kies een zorgprofiel</label><br>
-    <select name="profile_id" id="profile_id" value="client.profile_id">
+    <select name="profile_id" id="profile_id" value="{{ client.profile_id }}">
         {% for profile in profiles %}
-            <option value="{{ profile.id }}">{{ profile.name }}</option>
+            <option value="{{ profile.id }}" {% if client.profile_id == profile.id %}selected{% endif %}>{{ profile.name }}</option>
         {% endfor %}
     </select><br>
     <input type="submit" value="Aanpassen">

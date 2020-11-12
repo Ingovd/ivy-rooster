@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, Float, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.ext.declarative import declarative_base
@@ -13,19 +13,19 @@ class Session(Base):
     id = Column(Integer, primary_key=True)
     staff_id = Column(Integer, ForeignKey("staffs.person_id"))
     client_id = Column(Integer, ForeignKey("clients.person_id"))
-    hours = Column(Integer, default=1)
+    hours = Column(Float, default=1)
 
 class Presence(Base):
     __tablename__ = 'presences'
     person_id = Column(Integer, ForeignKey("persons.id"), primary_key=True)
     dole_id =  Column(Integer, ForeignKey("doles.id"), primary_key=True)
-    present = Column(Boolean)
+    present = Column(Integer)
 
 class Dole(Base):
     __tablename__ = 'doles'
     id = Column(Integer, primary_key = True)
     name = Column(String(127))
-    hours = Column(Integer, default=1)
+    hours = Column(Float, default=1)
     occupation = relationship("Presence", backref="dole", cascade="delete, delete-orphan")
 
 class Person(Base):
@@ -39,22 +39,22 @@ class Profile(Base):
     __tablename__ = 'profiles'
     id = Column(Integer, primary_key=True)
     name = Column(String(127))
-    ratio = Column(Integer)
+    ratio = Column(Float)
     clients = relationship("Client", backref="profile")
 
 class Client(Base):
     __tablename__ = 'clients'
     person_id = Column(Integer, ForeignKey("persons.id"), primary_key=True)
     profile_id = Column(Integer, ForeignKey("profiles.id"))
-    hours = Column(Integer, default=0)
+    hours = Column(Float, default=0)
     person = relationship("Person")
     sessions = relationship("Session", backref="client", cascade="delete, delete-orphan")
 
 class Staff(Base):
     __tablename__ = 'staffs'
     person_id = Column(Integer, ForeignKey("persons.id"), primary_key=True)
-    min_hours = Column(Integer, default=0)
-    max_hours = Column(Integer, default=0)
+    min_hours = Column(Float, default=0)
+    max_hours = Column(Float, default=0)
     person = relationship("Person")
     sessions = relationship("Session", backref="staff", cascade="delete, delete-orphan")
 
