@@ -109,7 +109,7 @@ table, td {
 }
 .radioContainer {
     display: inline-block;
-    width: 90px;
+    width: 70px;
     height: 0px;
     overflow:hidden;
     transition: height 0.1s ease;
